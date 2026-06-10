@@ -134,6 +134,7 @@ linkpond/
 ### Git hygiene
 - Small, focused commits per roadmap step. Conventional-ish messages (`feat:`, `fix:`, `refactor:`).
 - `.gitignore` covers `node_modules`, `.expo`, build artifacts, secrets.
+- **Never add Claude as a co-author.** No `Co-Authored-By:` lines. Commits are authored by the developer only.
 
 ---
 

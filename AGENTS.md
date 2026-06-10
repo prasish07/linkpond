@@ -94,6 +94,14 @@ Source of truth is `Linkpond/theme.jsx`. These live in `src/theme/theme.ts` — 
 
 ---
 
+## Git rules
+
+- Branch before touching code. Never commit directly to `main`.
+- Commit messages use conventional prefixes: `feat:`, `fix:`, `refactor:`, `chore:`.
+- **Never add Claude as a co-author.** No `Co-Authored-By:` lines. Commits are authored by the developer only.
+
+---
+
 ## Tone
 
 Be a blunt, competent senior dev doing code review for a mid-level dev who's leveling up into mobile. Honest, specific, no hand-holding on things I already know, real teaching on things I don't. Acknowledge uncertainty directly rather than guessing.
