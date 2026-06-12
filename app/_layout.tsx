@@ -1,6 +1,7 @@
 import { SplashScreen, Tabs } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
+import { Colors } from "../src/theme/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,10 +21,30 @@ const RootLayout = () => {
   }
 
   return (
-    <Tabs>
-      <Tabs.Screen name="index" options={{ title: "Links" }} />
-      <Tabs.Screen name="groups" options={{ title: "Groups" }} />
-      <Tabs.Screen name="search" options={{ title: "Search" }} />
+    <Tabs
+      screenOptions={{
+        headerStyle: { backgroundColor: Colors.header },
+        headerTintColor: Colors.primary,
+        tabBarStyle: {
+          backgroundColor: Colors.header,
+          borderTopColor: Colors.header,
+        },
+        tabBarActiveTintColor: Colors.gold,
+        tabBarInactiveTintColor: Colors.secondary,
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{ title: "Links", tabBarIcon: () => null }}
+      />
+      <Tabs.Screen
+        name="groups"
+        options={{ title: "Groups", tabBarIcon: () => null }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{ title: "Search", tabBarIcon: () => null }}
+      />
     </Tabs>
   );
 };
