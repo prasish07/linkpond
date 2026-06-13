@@ -2,6 +2,7 @@ import { SplashScreen, Tabs } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { Colors } from "../src/theme/theme";
+import { initDB } from "../src/db/client";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,6 +16,10 @@ const RootLayout = () => {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, error]);
+
+  useEffect(() => {
+    initDB().catch((e) => console.error("Failed to initialize database:", e));
+  }, []);
 
   if (!fontsLoaded && !error) {
     return null;
