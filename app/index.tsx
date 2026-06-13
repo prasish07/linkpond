@@ -1,53 +1,77 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { LinkCard } from "../src/features/links/components/LinkCard";
 import { Colors, Spacing } from "../src/theme/theme";
-
-const LINKS = [
-  {
-    id: "1",
-    title: "How I organize my entire life in one app",
-    source: "YouTube · Matt D'Avella",
-    domain: "youtube.com",
-    savedAt: "2h ago",
-    preview: "rich" as const,
-    duration: "12:04",
-  },
-  {
-    id: "2",
-    title: "Walnut + brass shelving detail",
-    source: "instagram.com",
-    domain: "instagram",
-    savedAt: "5h ago",
-    preview: "fallback" as const,
-    note: "Joinery reference for the studio wall.",
-  },
-  {
-    id: "3",
-    title: "The quiet power of local-first software",
-    source: "inkandswitch.com",
-    domain: "inkandswitch.com",
-    savedAt: "Yesterday",
-    preview: "rich" as const,
-  },
-  {
-    id: "4",
-    title: "Thread: 11 tiny UX details that feel expensive",
-    source: "x.com · @joulee",
-    domain: "x",
-    savedAt: "Yesterday",
-    preview: "fallback" as const,
-    reminder: "Sat, 10:00",
-  },
-];
+import { useEffect, useState } from "react";
+import { Link } from "../src/features/links/types";
+import { getAllLinks } from "../src/features/links/data/links.repo";
 
 const HomeScreen = () => {
+  const [links, setLinks] = useState<Link[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllLinks();
+        setLinks(data);
+      } catch (error) {
+        console.error("Failed to load links:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator color={Colors.gold} size="large" />
+      </View>
+    );
+  }
+
+  if (links.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.empty}>No links saved yet.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={LINKS}
+        data={links}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => <LinkCard item={item} />}
+        renderItem={({ item }) => (
+          <LinkCard
+            item={{
+              id: item.id,
+              title: item.title ?? "Untitled",
+              source: item.site_name ?? item.url,
+              domain: item.url,
+              savedAt: new Date(item.created_at * 1000).toLocaleDateString(),
+              preview: item.thumbnail_url ? "rich" : "fallback",
+              thumb: item.thumbnail_url ?? undefined,
+              note: item.note ?? undefined,
+            }}
+          />
+        )}
       />
     </View>
   );
@@ -61,6 +85,11 @@ const styles = StyleSheet.create({
   list: {
     padding: Spacing.padding.large,
     gap: Spacing.gap.medium,
+  },
+  empty: {
+    textAlign: "center",
+    color: Colors.secondary,
+    marginTop: Spacing.padding.large,
   },
 });
 
