@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { Colors } from "../../src/theme/theme";
+import { Colors } from "@/theme/theme";
 
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

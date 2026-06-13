@@ -1,7 +1,7 @@
 import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-import { initDB } from "../src/db/client";
+import { initDB } from "@/db/client";
 
 SplashScreen.preventAutoHideAsync();
 

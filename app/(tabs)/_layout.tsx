@@ -1,5 +1,5 @@
+import { Colors } from "@/theme/theme";
 import { Tabs } from "expo-router";
-import { Colors } from "../../src/theme/theme";
 
 const TabsLayout = () => {
   return (

@@ -1,5 +1,5 @@
+import { Colors } from "@/theme/theme";
 import { View, Text, StyleSheet } from "react-native";
-import { Colors } from "../../src/theme/theme";
 
 export default function GroupsScreen() {
   return (
