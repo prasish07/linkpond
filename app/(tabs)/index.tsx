@@ -5,11 +5,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { LinkCard } from "../src/features/links/components/LinkCard";
-import { Colors, Spacing } from "../src/theme/theme";
+import { Colors, Spacing } from "../../src/theme/theme";
 import { useEffect, useState } from "react";
-import { Link } from "../src/features/links/types";
-import { getAllLinks } from "../src/features/links/data/links.repo";
+import { Link } from "../../src/features/links/types";
+import { getAllLinks } from "../../src/features/links/data/links.repo";
+import { LinkCard } from "../../src/features/links/components/LinkCard";
 
 const HomeScreen = () => {
   const [links, setLinks] = useState<Link[]>([]);
