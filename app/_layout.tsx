@@ -33,6 +33,10 @@ const RootLayout = () => {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
         <Stack.Screen
+          name="group/create"
+          options={{ presentation: "modal", title: "New Group" }}
+        />
+        <Stack.Screen
           name="add"
           options={{ presentation: "modal", title: "Add Link" }}
         />

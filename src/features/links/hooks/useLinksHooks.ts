@@ -1,18 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAllLinks,
+  getLinkById,
   insertLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
 import { useRouter } from "expo-router";
 import { fetchPreview } from "@/lib/fetchPreview";
 
-type AddLinkFields = { url: string; title: string; note: string };
+type AddLinkFields = {
+  url: string;
+  title: string;
+  note: string;
+  group_id?: string;
+};
 
 export const useLinks = () =>
   useQuery({
     queryKey: ["links"],
     queryFn: getAllLinks,
+  });
+
+export const useLinkById = (id: string) =>
+  useQuery({
+    queryKey: ["link", id],
+    queryFn: () => getLinkById(id),
   });
 
 export const useAddLink = () => {
@@ -27,6 +39,7 @@ export const useAddLink = () => {
         url: fields.url,
         title: fields.title,
         note: fields.note,
+        group_id: fields.group_id,
       });
       const preview = await fetchPreview(fields.url);
       await updateLinkPreview(id, preview);
