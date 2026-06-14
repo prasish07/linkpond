@@ -1,5 +1,5 @@
+import { Colors, Spacing, Typography } from "@/theme/theme";
 import { StyleSheet, Text, View } from "react-native";
-import { Colors, Spacing, Typography } from "../../../theme/theme";
 
 type LinkItem = {
   id: string;
