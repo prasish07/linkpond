@@ -1,11 +1,10 @@
-import { insertLink } from "@/features/links/data/links.repo";
+import { useAddLink } from "@/features/links/hooks/useLinksHooks";
 import { Colors, Spacing } from "@/theme/theme";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, TextInput, Button } from "react-native";
 
 export default function AddScreen() {
-  const router = useRouter();
+  const { mutate: addLink, isPending } = useAddLink();
 
   const [inputFields, setInputFields] = useState({
     url: "",
@@ -18,21 +17,7 @@ export default function AddScreen() {
       alert("URL is required.");
       return;
     }
-    try {
-      const id = Math.random().toString(36).slice(2) + Date.now().toString(36);
-
-      await insertLink({
-        id,
-        url: inputFields.url,
-        title: inputFields.title,
-        note: inputFields.note,
-      });
-
-      router.back();
-    } catch (error) {
-      console.error("Failed to add link:", error);
-      alert("Failed to add link. Please try again.");
-    }
+    addLink(inputFields);
   };
 
   return (
@@ -55,7 +40,11 @@ export default function AddScreen() {
         onChangeText={(text) => setInputFields({ ...inputFields, note: text })}
         style={styles.input}
       />
-      <Button title="Add Link" onPress={handleAdd} />
+      <Button
+        title={`${isPending ? "Saving..." : "Add Link"}`}
+        onPress={handleAdd}
+        disabled={isPending}
+      />
     </View>
   );
 }

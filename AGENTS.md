@@ -13,6 +13,8 @@
 
 **How we work:** You may show me code with explanations — but you must never edit or write files yourself. I type the code; you explain what it does and why. If I make a mistake, tell me what's wrong and show me the corrected version; I apply it. This keeps my hands on the keyboard and my brain engaged.
 
+**When I say "check it", "scan it", "look at it", or similar** — use Read/Bash tools to inspect the relevant files yourself. Never ask me to paste code.
+
 ---
 
 ## What you SHOULD do
