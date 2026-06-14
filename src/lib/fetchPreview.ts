@@ -6,6 +6,19 @@ export type LinkPreview = {
   favicon_url: string | null;
 };
 
+const decodeHtmlEntities = (str: string): string =>
+  str
+    .replace(/&#x([0-9a-fA-F]+);/gi, (_, hex) =>
+      String.fromCodePoint(parseInt(hex, 16))
+    )
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ");
+
 const getMetaContent = (html: string, property: string): string | null => {
   const match =
     html.match(
@@ -44,11 +57,15 @@ export const fetchPreview = async (url: string): Promise<LinkPreview> => {
 
     const html = await response.text();
 
+    const title = getMetaContent(html, "og:title");
+    const description = getMetaContent(html, "og:description");
+    const siteName = getMetaContent(html, "og:site_name");
+
     return {
-      title: getMetaContent(html, "og:title"),
-      description: getMetaContent(html, "og:description"),
+      title: title ? decodeHtmlEntities(title) : null,
+      description: description ? decodeHtmlEntities(description) : null,
       thumbnail_url: getMetaContent(html, "og:image"),
-      site_name: getMetaContent(html, "og:site_name"),
+      site_name: siteName ? decodeHtmlEntities(siteName) : null,
       favicon_url: new URL("/favicon.ico", url).href,
     };
   } catch {

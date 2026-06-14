@@ -1,70 +1,192 @@
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+} from "react-native";
 import { useLocalSearchParams, useFocusEffect } from "expo-router";
-import { Colors } from "@/theme/theme";
-import { Link } from "@/features/links/types";
+import { Image } from "expo-image";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useCallback, useState } from "react";
-import { getLinkById } from "@/features/links/data/links.repo";
+import { useLinkById } from "@/features/links/hooks/useLinksHooks";
+import { getBrandInfo } from "@/lib/getBrandInfo";
 
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [linkData, setLinkData] = useState<Link | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: link, isLoading, refetch } = useLinkById(id);
+
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      const fetchLink = async () => {
-        try {
-          setIsLoading(true);
-          const link = await getLinkById(id);
-          setLinkData(link);
-        } catch (error) {
-          console.error("Failed to load link:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchLink();
-    }, [id])
+      refetch();
+    }, [refetch])
   );
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator
-          color={Colors.gold}
-          size="large"
-          style={{ flex: 1 }}
-        />
+      <View style={styles.centered}>
+        <ActivityIndicator color={Colors.gold} size="large" />
       </View>
     );
   }
 
-  if (!linkData) {
+  if (!link) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Link not found.</Text>
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>Link not found.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Title: {linkData.title ?? "Untitled"}</Text>
-      <Text style={styles.text}>URL: {linkData.url}</Text>
-      <Text style={styles.text}>
-        Description: {linkData.description ?? "No description"}
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+      {link.thumbnail_url && !imgError ? (
+        <Image
+          source={{ uri: link.thumbnail_url }}
+          style={styles.thumbnail}
+          contentFit="cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        (() => {
+          const brand = getBrandInfo(link.url);
+          return brand ? (
+            <View style={styles.thumbnailFallback}>
+              <FontAwesome name={brand.icon} size={64} color={brand.color} />
+            </View>
+          ) : null;
+        })()
+      )}
+
+      <View style={styles.meta}>
+        {link.favicon_url && (
+          <Image source={{ uri: link.favicon_url }} style={styles.favicon} />
+        )}
+        <Text style={styles.siteName} numberOfLines={1}>
+          {link.site_name ?? new URL(link.url).hostname}
+        </Text>
+      </View>
+
+      <Text style={styles.title} numberOfLines={3}>
+        {link.title ?? "Untitled"}
       </Text>
-    </View>
+
+      {link.description && (
+        <View style={styles.descContainer}>
+          <Text
+            style={styles.description}
+            numberOfLines={descExpanded ? undefined : 10}
+          >
+            {link.description}
+          </Text>
+          {link.description.split("\n").length > 10 ||
+          link.description.length > 500 ? (
+            <TouchableOpacity onPress={() => setDescExpanded(!descExpanded)}>
+              <Text style={styles.readMore}>
+                {descExpanded ? "Show less" : "Read more"}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      )}
+
+      {link.note && (
+        <View style={styles.noteCard}>
+          <Ionicons
+            name="document-text-outline"
+            size={16}
+            color={Colors.secondary}
+          />
+          <Text style={styles.noteText}>{link.note}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={styles.openBtn}
+        onPress={() => Linking.openURL(link.url)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="open-outline" size={18} color={Colors.body} />
+        <Text style={styles.openBtnText}>Open in browser</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: { flex: 1, backgroundColor: Colors.body },
+  container: { paddingBottom: Spacing.padding.xlarge },
+  centered: {
     flex: 1,
     backgroundColor: Colors.body,
     justifyContent: "center",
     alignItems: "center",
   },
-  text: { color: Colors.secondary },
+  errorText: { color: Colors.secondary },
+  thumbnail: { width: "100%", height: 200 },
+  meta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    padding: Spacing.padding.large,
+    paddingBottom: 0,
+  },
+  favicon: { width: 16, height: 16, borderRadius: 4 },
+  siteName: { color: Colors.secondary, fontSize: Typography.fontSize.small },
+  title: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.large,
+    fontWeight: "700",
+    padding: Spacing.padding.large,
+    paddingBottom: Spacing.gap.small,
+  },
+  description: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.medium,
+    paddingHorizontal: Spacing.padding.large,
+    lineHeight: Typography.fontLineHeight.medium,
+  },
+  noteCard: {
+    flexDirection: "row",
+    gap: Spacing.gap.small,
+    backgroundColor: Colors.card,
+    margin: Spacing.padding.large,
+    padding: Spacing.padding.medium,
+    borderRadius: Spacing.radius.medium,
+  },
+  noteText: { color: Colors.secondary, flex: 1 },
+  openBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.gap.small,
+    backgroundColor: Colors.gold,
+    margin: Spacing.padding.large,
+    padding: Spacing.padding.medium,
+    borderRadius: Spacing.radius.medium,
+  },
+  openBtnText: {
+    color: Colors.body,
+    fontWeight: "700",
+    fontSize: Typography.fontSize.medium,
+  },
+  descContainer: { paddingHorizontal: Spacing.padding.large },
+  readMore: {
+    color: Colors.gold,
+    fontSize: Typography.fontSize.small,
+    marginTop: Spacing.gap.small,
+  },
+  thumbnailFallback: {
+    width: "100%",
+    height: 200,
+    backgroundColor: Colors.card,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

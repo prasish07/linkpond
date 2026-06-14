@@ -1,5 +1,10 @@
 import { Colors, Spacing, Typography } from "@/theme/theme";
+import { Image } from "expo-image";
 import { StyleSheet, Text, View } from "react-native";
+
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { getBrandInfo } from "@/lib/getBrandInfo";
+import { useState } from "react";
 
 type LinkItem = {
   id: string;
@@ -19,14 +24,32 @@ type Props = {
 };
 
 export const LinkCard = ({ item }: Props) => {
-  const isFallback = item.preview === "fallback";
+  const [imgError, setImgError] = useState(false);
+
+  const showFallback = !item.thumb || imgError;
 
   return (
     <View style={styles.card}>
       {/* left */}
-      <View style={[styles.thumb, isFallback && styles.thumbFallback]}>
-        {isFallback && <Text style={styles.domain}>{item.domain}</Text>}
-      </View>
+      {!showFallback ? (
+        <Image
+          source={{ uri: item.thumb }}
+          style={styles.thumb}
+          contentFit="cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <View style={[styles.thumb, styles.thumbFallback]}>
+          {(() => {
+            const brand = getBrandInfo(item.domain);
+            return brand ? (
+              <FontAwesome name={brand.icon} size={32} color={brand.color} />
+            ) : (
+              <Ionicons name="link-outline" size={24} color={Colors.tertiary} />
+            );
+          })()}
+        </View>
+      )}
 
       {/* right */}
       <View style={styles.content}>
@@ -34,7 +57,7 @@ export const LinkCard = ({ item }: Props) => {
           {item.title}
         </Text>
         <Text style={styles.source} numberOfLines={1}>
-          {isFallback ? item.domain : item.source}
+          {item.source}
         </Text>
         <Text style={styles.meta}>{item.savedAt}</Text>
       </View>

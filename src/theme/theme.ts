@@ -58,3 +58,12 @@ export const Typography = {
     xxlarge: 32,
   },
 };
+
+export const GroupColors = [
+  "#E8D44D", // gold
+  "#9DBE8E", // green
+  "#D6897A", // red
+  "#7AA8D6", // blue
+  "#C97AD6", // purple
+  "#D6B87A", // orange
+];
