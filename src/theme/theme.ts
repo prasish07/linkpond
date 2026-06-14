@@ -17,18 +17,21 @@ export const Spacing = {
     medium: 12,
     large: 16,
     xlarge: 24,
+    xxlarge: 28,
   },
   padding: {
     small: 8,
     medium: 12,
     large: 16,
     xlarge: 24,
+    xxlarge: 28,
   },
   gap: {
     small: 8,
     medium: 12,
     large: 16,
     xlarge: 24,
+    xxlarge: 28,
   },
 };
 
@@ -45,11 +48,13 @@ export const Typography = {
     medium: 16,
     large: 20,
     xlarge: 24,
+    xxlarge: 28,
   },
   fontLineHeight: {
     small: 16,
     medium: 20,
     large: 24,
     xlarge: 28,
+    xxlarge: 32,
   },
 };

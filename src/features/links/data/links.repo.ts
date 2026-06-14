@@ -25,3 +25,11 @@ export const insertLink = async (
     ]
   );
 };
+
+export const getLinkById = async (id: string): Promise<Link | null> => {
+  const results = await db.getFirstAsync<Link>(
+    "SELECT * FROM links WHERE id = ?",
+    [id]
+  );
+  return results || null;
+};
