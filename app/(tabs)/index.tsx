@@ -6,37 +6,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Link } from "@/features/links/types";
-import { getAllLinks } from "@/features/links/data/links.repo";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useLinks } from "@/features/links/hooks/useLinksHooks";
 
 const FAB_SIZE = 56;
 
 const HomeScreen = () => {
   const router = useRouter();
-
-  const [links, setLinks] = useState<Link[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: links = [], isLoading, refetch } = useLinks();
 
   useFocusEffect(
     useCallback(() => {
-      const load = async () => {
-        try {
-          setIsLoading(true);
-          const data = await getAllLinks();
-          setLinks(data);
-        } catch (error) {
-          console.error("Failed to load links:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      load();
-    }, [])
+      refetch();
+    }, [refetch])
   );
 
   const renderLink = useCallback(

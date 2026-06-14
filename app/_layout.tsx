@@ -2,8 +2,11 @@ import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { initDB } from "@/db/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
@@ -25,14 +28,16 @@ const RootLayout = () => {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
-      <Stack.Screen
-        name="add"
-        options={{ presentation: "modal", title: "Add Link" }}
-      />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
+        <Stack.Screen
+          name="add"
+          options={{ presentation: "modal", title: "Add Link" }}
+        />
+      </Stack>
+    </QueryClientProvider>
   );
 };
 

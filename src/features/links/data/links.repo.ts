@@ -1,5 +1,6 @@
 import db from "@/db/client";
 import { Link } from "../types";
+import { LinkPreview } from "@/lib/fetchPreview";
 
 export const getAllLinks = async (): Promise<Link[]> => {
   return db.getAllAsync<Link>(
@@ -32,4 +33,21 @@ export const getLinkById = async (id: string): Promise<Link | null> => {
     [id]
   );
   return results || null;
+};
+
+export const updateLinkPreview = async (
+  id: string,
+  preview: LinkPreview
+): Promise<void> => {
+  await db.runAsync(
+    `UPDATE links SET title = COALESCE(?, title), description = COALESCE(?, description), thumbnail_url = COALESCE(?, thumbnail_url), site_name = COALESCE(?, site_name), favicon_url = COALESCE(?, favicon_url) WHERE id = ?`,
+    [
+      preview.title,
+      preview.description,
+      preview.thumbnail_url,
+      preview.site_name,
+      preview.favicon_url,
+      id,
+    ]
+  );
 };
