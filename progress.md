@@ -104,3 +104,16 @@
 | Device | Galaxy S24 Ultra (physical Android) |
 | Builds | EAS cloud builds for dev builds |
 | Dev machine | Ubuntu, 16GB RAM |
+## Last session
+
+- Date: 2026-06-15 20:58
+- Branch: `feature/phase-4-groups`
+
+Recent commits:
+```
+6018af6 feat: filter home list by group
+9532f3d feat: groups CRUD, improved link card, detail screen UI, OG preview fixes
+1919530 Merge pull request #9 from prasish07/feature/phase-3-preview-fetch
+ef0ab14 feat: add OG preview fetch, React Query integration, and useLinksHooks
+3947719 Merge pull request #8 from prasish07/feature/phase-2-add-form
+```
