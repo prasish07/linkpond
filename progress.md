@@ -106,14 +106,14 @@
 | Dev machine | Ubuntu, 16GB RAM |
 ## Last session
 
-- Date: 2026-06-15 20:58
+- Date: 2026-06-15 21:09
 - Branch: `feature/phase-4-groups`
 
 Recent commits:
 ```
+88281cd chore: auto-update progress.md on session stop via Claude Code hook
+24afba9 fix: group filter chip height inconsistency on home screen
 6018af6 feat: filter home list by group
 9532f3d feat: groups CRUD, improved link card, detail screen UI, OG preview fixes
 1919530 Merge pull request #9 from prasish07/feature/phase-3-preview-fetch
-ef0ab14 feat: add OG preview fetch, React Query integration, and useLinksHooks
-3947719 Merge pull request #8 from prasish07/feature/phase-2-add-form
 ```
