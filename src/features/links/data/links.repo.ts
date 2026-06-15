@@ -2,7 +2,14 @@ import db from "@/db/client";
 import { Link } from "../types";
 import { LinkPreview } from "@/lib/fetchPreview";
 
-export const getAllLinks = async (): Promise<Link[]> => {
+export const getAllLinks = async (groupId?: string): Promise<Link[]> => {
+  if (groupId) {
+    return db.getAllAsync<Link>(
+      "SELECT * FROM links WHERE is_archived = 0 AND group_id = ? ORDER BY created_at DESC",
+      [groupId]
+    );
+  }
+
   return db.getAllAsync<Link>(
     "SELECT * FROM links where is_archived = 0 ORDER BY created_at DESC"
   );

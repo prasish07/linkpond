@@ -15,10 +15,10 @@ type AddLinkFields = {
   group_id?: string;
 };
 
-export const useLinks = () =>
+export const useLinks = (groupId?: string) =>
   useQuery({
-    queryKey: ["links"],
-    queryFn: getAllLinks,
+    queryKey: ["links", groupId],
+    queryFn: () => getAllLinks(groupId),
   });
 
 export const useLinkById = (id: string) =>

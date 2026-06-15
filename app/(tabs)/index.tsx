@@ -1,23 +1,32 @@
 import {
   ActivityIndicator,
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useLinks } from "@/features/links/hooks/useLinksHooks";
+import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { Group } from "@/features/groups/types";
+import { Ionicons } from "@expo/vector-icons";
 
 const FAB_SIZE = 56;
+const CHIP_HEIGHT = 36;
 
 const HomeScreen = () => {
+  const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
+    undefined
+  );
+  const { data: groups = [] } = useGroups();
   const router = useRouter();
-  const { data: links = [], isLoading, refetch } = useLinks();
+  const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
 
   useFocusEffect(
     useCallback(() => {
@@ -47,6 +56,58 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      {groups.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContent}
+          style={styles.filter}
+        >
+          <TouchableOpacity
+            style={[styles.chip, !selectedGroupId && styles.chipActive]}
+            onPress={() => setSelectedGroupId(undefined)}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                !selectedGroupId && styles.chipTextActive,
+              ]}
+            >
+              All
+            </Text>
+          </TouchableOpacity>
+          {groups.map((g: Group) => (
+            <TouchableOpacity
+              key={g.id}
+              style={[
+                styles.chip,
+                selectedGroupId === g.id && {
+                  backgroundColor: g.color,
+                  borderColor: g.color,
+                },
+              ]}
+              onPress={() => setSelectedGroupId(g.id)}
+            >
+              {/* icon stored as string in DB; type-safe cast not possible without runtime validation */}
+              <Ionicons
+                name={g.icon as any}
+                size={14}
+                color={
+                  selectedGroupId === g.id ? Colors.body : Colors.secondary
+                }
+              />
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedGroupId === g.id && { color: Colors.body },
+                ]}
+              >
+                {g.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
       {isLoading ? (
         <ActivityIndicator
           color={Colors.gold}
@@ -59,6 +120,7 @@ const HomeScreen = () => {
         <FlatList
           data={links}
           keyExtractor={(item) => item.id}
+          style={styles.listContainer}
           contentContainerStyle={styles.list}
           renderItem={renderLink}
         />
@@ -74,6 +136,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.body,
+  },
+  listContainer: {
+    flex: 1,
   },
   list: {
     padding: Spacing.padding.large,
@@ -100,6 +165,36 @@ const styles = StyleSheet.create({
     color: Colors.body,
     lineHeight: Typography.fontLineHeight.xxlarge,
   },
+  filter: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: CHIP_HEIGHT,
+    marginTop: Spacing.padding.large,
+  },
+  filterContent: {
+    paddingHorizontal: Spacing.padding.large,
+    gap: Spacing.gap.small,
+    alignItems: "center",
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.gap.small,
+    paddingHorizontal: Spacing.padding.medium,
+    borderRadius: Spacing.radius.xlarge,
+    borderWidth: 1,
+    borderColor: Colors.input,
+    backgroundColor: Colors.input,
+    height: CHIP_HEIGHT,
+  },
+  chipActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  chipText: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.small,
+    lineHeight: Typography.fontLineHeight.small,
+  },
+  chipTextActive: { color: Colors.body },
 });
 
 export default HomeScreen;
