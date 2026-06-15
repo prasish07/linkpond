@@ -18,6 +18,7 @@ import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
 
 const FAB_SIZE = 56;
+const CHIP_HEIGHT = 36;
 
 const HomeScreen = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
@@ -59,8 +60,8 @@ const HomeScreen = () => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.filterBar}
           contentContainerStyle={styles.filterContent}
+          style={styles.filter}
         >
           <TouchableOpacity
             style={[styles.chip, !selectedGroupId && styles.chipActive]}
@@ -119,6 +120,7 @@ const HomeScreen = () => {
         <FlatList
           data={links}
           keyExtractor={(item) => item.id}
+          style={styles.listContainer}
           contentContainerStyle={styles.list}
           renderItem={renderLink}
         />
@@ -134,6 +136,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.body,
+  },
+  listContainer: {
+    flex: 1,
   },
   list: {
     padding: Spacing.padding.large,
@@ -160,7 +165,12 @@ const styles = StyleSheet.create({
     color: Colors.body,
     lineHeight: Typography.fontLineHeight.xxlarge,
   },
-  filterBar: { maxHeight: 48 },
+  filter: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: CHIP_HEIGHT,
+    marginTop: Spacing.padding.large,
+  },
   filterContent: {
     paddingHorizontal: Spacing.padding.large,
     gap: Spacing.gap.small,
@@ -169,16 +179,21 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: Spacing.gap.small,
     paddingHorizontal: Spacing.padding.medium,
-    paddingVertical: Spacing.padding.small,
     borderRadius: Spacing.radius.xlarge,
     borderWidth: 1,
     borderColor: Colors.input,
     backgroundColor: Colors.input,
+    height: CHIP_HEIGHT,
   },
   chipActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
-  chipText: { color: Colors.secondary, fontSize: Typography.fontSize.small },
+  chipText: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.small,
+    lineHeight: Typography.fontLineHeight.small,
+  },
   chipTextActive: { color: Colors.body },
 });
 
