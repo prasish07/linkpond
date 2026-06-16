@@ -105,6 +105,7 @@ export default function AddScreen() {
                 ]}
                 onPress={() => setSelectedGroupId(g.id)}
               >
+                {/* icon stored as string in DB; type-safe cast not possible without runtime validation */}
                 <Ionicons
                   name={g.icon as any}
                   size={14}

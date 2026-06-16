@@ -2,16 +2,29 @@ import db from "@/db/client";
 import { Link } from "../types";
 import { LinkPreview } from "@/lib/fetchPreview";
 
-export const getAllLinks = async (groupId?: string): Promise<Link[]> => {
+export const getAllLinks = async (
+  groupId?: string,
+  search?: string
+): Promise<Link[]> => {
+  const conditions: string[] = ["is_archived = 0"];
+  const params: (string | number)[] = [];
+
   if (groupId) {
-    return db.getAllAsync<Link>(
-      "SELECT * FROM links WHERE is_archived = 0 AND group_id = ? ORDER BY created_at DESC",
-      [groupId]
-    );
+    conditions.push("group_id = ?");
+    params.push(groupId);
   }
 
+  if (search) {
+    const like = `%${search}%`;
+    conditions.push(`(title LIKE ? OR note LIKE ? OR url like ?)`);
+    params.push(like, like, like);
+  }
+
+  const where = conditions.join(" AND ");
+
   return db.getAllAsync<Link>(
-    "SELECT * FROM links where is_archived = 0 ORDER BY created_at DESC"
+    `SELECT * FROM links where ${where} ORDER BY created_at DESC`,
+    params
   );
 };
 

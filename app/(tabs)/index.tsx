@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
 import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
@@ -16,6 +15,7 @@ import { useLinks } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const FAB_SIZE = 56;
 const CHIP_HEIGHT = 36;
@@ -24,9 +24,10 @@ const HomeScreen = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+
+  const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
   const { data: groups = [] } = useGroups();
   const router = useRouter();
-  const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,7 +56,7 @@ const HomeScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {groups.length > 0 && (
         <ScrollView
           horizontal
@@ -128,7 +129,7 @@ const HomeScreen = () => {
       <TouchableOpacity style={styles.fab} onPress={() => router.push("/add")}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -143,6 +144,18 @@ const styles = StyleSheet.create({
   list: {
     padding: Spacing.padding.large,
     gap: Spacing.gap.medium,
+    flexShrink: 0,
+  },
+  input: {
+    marginHorizontal: Spacing.padding.large,
+    marginTop: Spacing.padding.large,
+    paddingHorizontal: Spacing.padding.medium,
+    paddingVertical: Spacing.padding.small,
+    backgroundColor: Colors.input,
+    borderRadius: Spacing.radius.large,
+    color: Colors.primary,
+    fontSize: Typography.fontSize.medium,
+    height: 44,
   },
   empty: {
     textAlign: "center",
