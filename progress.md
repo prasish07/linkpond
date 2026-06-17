@@ -4,10 +4,10 @@
 
 ---
 
-## Current phase: Phase 3 — Preview fetching
+## Current phase: Phase 6a — Share intent
 
-**Learning goal:** async side effects against the network, error/loading states, graceful degradation.
-**Build goal:** Pasting a URL fetches title/description/thumbnail; broken previews (IG/FB/X) degrade cleanly to a fallback card.
+**Learning goal:** native modules, development builds, Android share intents, app lifecycle.
+**Build goal:** Share a link from YouTube/X into Linkpond and save it via a normal modal screen.
 
 ---
 
@@ -43,6 +43,26 @@
 - Added `xxlarge` step to all Spacing + Typography scales in `theme.ts`
 - Full flow verified on device: FAB → add → save → card in list → tap → detail screen
 
+### Phase 3 — Preview fetching ✅
+- `src/lib/fetchPreview.ts` — fetches OG tags (title, description, image, site_name, favicon)
+- Optimistic insert in `add.tsx` — row inserted immediately, preview fetched in background
+- `updateLinkPreview` in `links.repo.ts` — updates preview fields with `COALESCE` to preserve manual values
+- Graceful fallback: IG/FB/X failures leave the row with just URL, `LinkCard` fallback variant renders cleanly
+
+### Phase 4 — Groups & tags ✅
+- Groups CRUD: create/edit/delete with name, color, icon picker (`app/group/create.tsx`)
+- `src/features/groups/` — repo, hooks, types
+- Groups tab (`app/(tabs)/groups.tsx`) — list with link count per group
+- Home screen filter chips — tap group to filter, "All" resets; dynamic WHERE clause in `getAllLinks`
+- `useGroups` hook with React Query
+
+### Phase 5 — Search & sort ✅
+- `getAllLinks` updated with dynamic WHERE clause supporting `search` + `groupId` simultaneously
+- `src/lib/useDebounce.ts` — custom 300ms debounce hook using `useEffect` cleanup
+- Search tab (`app/(tabs)/search.tsx`) — search input with icon, Recent/Oldest sort chips, results list
+- Sort done in JS: `[...links].reverse()` for oldest-first (safe — avoids mutating React Query cache)
+- Tab bar icons added (Ionicons), `SafeAreaView` applied to all tab screens
+
 ### Key fixes along the way
 - `crypto.randomUUID()` not available on Hermes → `Math.random().toString(36).slice(2) + Date.now().toString(36)`
 - `useFocusEffect` + `useCallback` required for data that must refresh on screen focus (vs `useEffect` which only runs on mount)
@@ -67,10 +87,10 @@
 | 0 | ✅ Done | Setup, fonts, hardcoded cards |
 | 1 | ✅ Done | SQLite schema + data layer |
 | 2 | ✅ Done | Add form, detail screen, navigation |
-| 3 | 🔄 Current | Preview fetch — OG parsing, graceful fallback |
-| 4 | | Groups & tags — many-to-many, filter by group |
-| 5 | | Search & sort — debounced input, SQLite FTS5 or in-memory |
-| 6a | | Share intent — receive URLs from other apps, dev build required |
+| 3 | ✅ Done | Preview fetch — OG parsing, graceful fallback |
+| 4 | ✅ Done | Groups & tags — many-to-many, filter by group |
+| 5 | ✅ Done | Search & sort — debounced input, SQLite FTS5 or in-memory |
+| 6a | 🔄 Current | Share intent — receive URLs from other apps, dev build required |
 | 6b | | Popup-over-app theming — translucent Activity, native config plugin |
 | 7 | | Clipboard auto-detect — foreground lifecycle |
 | 8 | | Reminders — local notifications, deep link from notification |
@@ -106,14 +126,14 @@
 | Dev machine | Ubuntu, 16GB RAM |
 ## Last session
 
-- Date: 2026-06-15 21:09
-- Branch: `feature/phase-4-groups`
+- Date: 2026-06-16 23:39
+- Branch: `feature/phase-5-search-sort`
 
 Recent commits:
 ```
+31c3901 Merge pull request #11 from prasish07/feature/phase-4-groups
+bbaf169 chore: update progress.md session log
 88281cd chore: auto-update progress.md on session stop via Claude Code hook
 24afba9 fix: group filter chip height inconsistency on home screen
 6018af6 feat: filter home list by group
-9532f3d feat: groups CRUD, improved link card, detail screen UI, OG preview fixes
-1919530 Merge pull request #9 from prasish07/feature/phase-3-preview-fetch
 ```

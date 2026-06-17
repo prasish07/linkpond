@@ -11,6 +11,7 @@ import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Group } from "@/features/groups/types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const FAB_SIZE = 56;
 
@@ -37,7 +38,7 @@ export default function GroupsScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {isLoading ? null : groups.length === 0 ? (
         <Text style={styles.empty}>No groups yet.</Text>
       ) : (
@@ -54,7 +55,7 @@ export default function GroupsScreen() {
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
