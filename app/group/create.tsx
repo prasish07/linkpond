@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography, GroupColors } from "@/theme/theme";
 import { useAddGroup } from "@/features/groups/hooks/useGroupsHooks";
 
-const ICONS: Array<keyof typeof Ionicons.glyphMap> = [
+const ICONS: (keyof typeof Ionicons.glyphMap)[] = [
   "bookmark",
   "folder",
   "star",
@@ -107,7 +107,7 @@ const CreateGroupScreen = () => {
         disabled={isPending}
       >
         <Text style={styles.saveBtnText}>
-          {isPending ? "Saving..." : "Create Group"}
+          {isPending ? "Saving..." : "Create group"}
         </Text>
       </TouchableOpacity>
     </View>

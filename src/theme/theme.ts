@@ -6,13 +6,14 @@ export const Colors = {
   gold: "#E8D44D",
   primary: "#F3EEE4",
   secondary: "#A8A294",
-  tertiary: "#746F65",
   destructive: "#D6897A",
+  tertiary: "#746F65",
   confirm: "#9DBE8E",
 };
 
 export const Spacing = {
   radius: {
+    xs: 4,
     small: 8,
     medium: 12,
     large: 16,
@@ -27,6 +28,7 @@ export const Spacing = {
     xxlarge: 28,
   },
   gap: {
+    xs: 4,
     small: 8,
     medium: 12,
     large: 16,
@@ -38,11 +40,11 @@ export const Spacing = {
 export const Typography = {
   fontFamily: "HankenGrotesk",
   fontWeight: {
-    regular: "400",
-    medium: "500",
-    semibold: "600",
-    bold: "700",
-  },
+    regular: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+  } as const,
   fontSize: {
     small: 12,
     medium: 16,

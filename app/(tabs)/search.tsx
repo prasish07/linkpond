@@ -17,6 +17,8 @@ import { LinkCard } from "@/features/links/components/LinkCard";
 import { Link } from "@/features/links/types";
 import { useRouter } from "expo-router";
 import useDebounce from "@/lib/useDebounce";
+import { timeAgo } from "@/lib/timeAgo";
+import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 
 type SortOption = "recent" | "oldest";
 
@@ -32,6 +34,8 @@ const SearchScreen = () => {
   const router = useRouter();
 
   const { data: links = [], isLoading } = useLinks(undefined, debouncedQuery);
+  const { data: groups = [] } = useGroups();
+  const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
   const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
 
@@ -44,15 +48,21 @@ const SearchScreen = () => {
             title: item.title ?? "Untitled",
             source: item.site_name ?? item.url,
             domain: item.url,
-            savedAt: new Date(item.created_at * 1000).toLocaleDateString(),
+            savedAt: timeAgo(item.created_at),
             preview: item.thumbnail_url ? "rich" : "fallback",
             thumb: item.thumbnail_url ?? undefined,
             note: item.note ?? undefined,
+            groupName: item.group_id
+              ? groupsMap[item.group_id]?.name
+              : undefined,
+            groupColor: item.group_id
+              ? groupsMap[item.group_id]?.color
+              : undefined,
           }}
         />
       </TouchableOpacity>
     ),
-    [router]
+    [router, groupsMap]
   );
 
   return (
