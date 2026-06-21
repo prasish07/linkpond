@@ -17,45 +17,87 @@ type LinkItem = {
   thumb?: string;
   duration?: string;
   reminder?: string;
+  groupName?: string;
+  groupColor?: string;
 };
 
 type Props = {
   item: LinkItem;
+  variant?: "card" | "list";
 };
 
-export const LinkCard = ({ item }: Props) => {
+const DOT_SIZE = 7;
+
+export const LinkCard = ({ item, variant }: Props) => {
   const [imgError, setImgError] = useState(false);
 
   const showFallback = !item.thumb || imgError;
 
+  const getFallbackIcon = (domain: string, size: number) => {
+    const brand = getBrandInfo(domain);
+    return brand ? (
+      <FontAwesome name={brand.icon} size={size} color={brand.color} />
+    ) : (
+      <Ionicons name="link-outline" size={size} color={Colors.tertiary} />
+    );
+  };
+
+  if (variant === "card") {
+    return (
+      <View style={styles.cardContainer}>
+        {/* full-width thumbnail */}
+        {!showFallback ? (
+          <Image
+            source={{ uri: item.thumb }}
+            style={styles.cardThumb}
+            contentFit="cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <View style={[styles.cardThumb, styles.thumbFallback]}>
+            {getFallbackIcon(item.domain, 48)}
+          </View>
+        )}
+        {/* content */}
+        <View style={styles.cardContent}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.source} numberOfLines={1}>
+            {item.source}
+          </Text>
+          <Text style={styles.meta}>{item.savedAt}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.card}>
-      {/* left */}
+    <View style={styles.listContainer}>
       {!showFallback ? (
         <Image
           source={{ uri: item.thumb }}
-          style={styles.thumb}
+          style={styles.listThumb}
           contentFit="cover"
           onError={() => setImgError(true)}
         />
       ) : (
-        <View style={[styles.thumb, styles.thumbFallback]}>
-          {(() => {
-            const brand = getBrandInfo(item.domain);
-            return brand ? (
-              <FontAwesome name={brand.icon} size={32} color={brand.color} />
-            ) : (
-              <Ionicons name="link-outline" size={24} color={Colors.tertiary} />
-            );
-          })()}
+        <View style={[styles.listThumb, styles.thumbFallback]}>
+          {getFallbackIcon(item.domain, 32)}
         </View>
       )}
-
-      {/* right */}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
         </Text>
+        {item.groupName && (
+          <View style={styles.groupRow}>
+            <View
+              style={[styles.groupDot, { backgroundColor: item.groupColor }]}
+            />
+            <Text style={styles.groupLabel}>{item.groupName}</Text>
+          </View>
+        )}
         <Text style={styles.source} numberOfLines={1}>
           {item.source}
         </Text>
@@ -66,30 +108,40 @@ export const LinkCard = ({ item }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  card: {
+  // list variant
+  listContainer: {
     flexDirection: "row",
     backgroundColor: Colors.card,
     borderRadius: Spacing.radius.medium,
     padding: Spacing.padding.medium,
     gap: Spacing.gap.medium,
   },
-  thumb: {
+  listThumb: {
     width: 80,
     height: 72,
     borderRadius: Spacing.radius.small,
     backgroundColor: Colors.input,
     flexShrink: 0,
   },
+  // card variant
+  cardContainer: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radius.medium,
+    overflow: "hidden",
+  },
+  cardThumb: {
+    width: "100%",
+    height: 180,
+    backgroundColor: Colors.input,
+  },
+  cardContent: {
+    padding: Spacing.padding.medium,
+    gap: Spacing.gap.small,
+  },
+  // shared
   thumbFallback: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 4,
-  },
-  domain: {
-    fontSize: Typography.fontSize.small,
-    fontFamily: Typography.fontFamily,
-    color: Colors.secondary,
-    textAlign: "center",
   },
   content: {
     flex: 1,
@@ -110,5 +162,19 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.small,
     fontFamily: Typography.fontFamily,
     color: Colors.tertiary,
+  },
+  groupRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
+  },
+  groupDot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: Spacing.radius.xs,
+  },
+  groupLabel: {
+    fontSize: Typography.fontSize.small,
+    color: Colors.secondary,
   },
 });

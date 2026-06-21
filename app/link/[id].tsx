@@ -69,7 +69,14 @@ export default function LinkDetailScreen() {
           <Image source={{ uri: link.favicon_url }} style={styles.favicon} />
         )}
         <Text style={styles.siteName} numberOfLines={1}>
-          {link.site_name ?? new URL(link.url).hostname}
+          {link.site_name ??
+            (() => {
+              try {
+                return new URL(link.url).hostname;
+              } catch {
+                return link.url;
+              }
+            })()}
         </Text>
       </View>
 
@@ -113,7 +120,7 @@ export default function LinkDetailScreen() {
         activeOpacity={0.7}
       >
         <Ionicons name="open-outline" size={18} color={Colors.body} />
-        <Text style={styles.openBtnText}>Open in browser</Text>
+        <Text style={styles.openBtnText}>Open original</Text>
       </TouchableOpacity>
     </ScrollView>
   );

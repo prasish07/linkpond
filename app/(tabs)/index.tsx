@@ -5,29 +5,38 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useLinks } from "@/features/links/hooks/useLinksHooks";
+import {
+  useGroupLinkCounts,
+  useLinks,
+} from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timeAgo } from "@/lib/timeAgo";
 
 const FAB_SIZE = 56;
-const CHIP_HEIGHT = 36;
+const CHIP_HEIGHT = 26;
 
 const HomeScreen = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const [viewMode, setViewMode] = useState<"card" | "list">("list");
 
   const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
+  const { data: allLinks = [] } = useLinks(undefined, undefined);
   const { data: groups = [] } = useGroups();
+  const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
   const router = useRouter();
+  const { data: groupCounts = {} } = useGroupLinkCounts();
 
   useFocusEffect(
     useCallback(() => {
@@ -44,71 +53,121 @@ const HomeScreen = () => {
             title: item.title ?? "Untitled",
             source: item.site_name ?? item.url,
             domain: item.url,
-            savedAt: new Date(item.created_at * 1000).toLocaleDateString(),
+            savedAt: timeAgo(item.created_at),
             preview: item.thumbnail_url ? "rich" : "fallback",
             thumb: item.thumbnail_url ?? undefined,
             note: item.note ?? undefined,
+            groupName: item.group_id
+              ? groupsMap[item.group_id]?.name
+              : undefined,
+            groupColor: item.group_id
+              ? groupsMap[item.group_id]?.color
+              : undefined,
           }}
+          variant={viewMode}
         />
       </TouchableOpacity>
     ),
-    [router]
+    [router, viewMode, groupsMap]
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {groups.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContent}
-          style={styles.filter}
-        >
-          <TouchableOpacity
-            style={[styles.chip, !selectedGroupId && styles.chipActive]}
-            onPress={() => setSelectedGroupId(undefined)}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                !selectedGroupId && styles.chipTextActive,
-              ]}
-            >
-              All
-            </Text>
-          </TouchableOpacity>
-          {groups.map((g: Group) => (
-            <TouchableOpacity
-              key={g.id}
-              style={[
-                styles.chip,
-                selectedGroupId === g.id && {
-                  backgroundColor: g.color,
-                  borderColor: g.color,
-                },
-              ]}
-              onPress={() => setSelectedGroupId(g.id)}
-            >
-              {/* icon stored as string in DB; type-safe cast not possible without runtime validation */}
+      <View style={styles.topBar}>
+        {/* header always visible */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <View style={styles.logoIcon}>
               <Ionicons
-                name={g.icon as any}
-                size={14}
-                color={
-                  selectedGroupId === g.id ? Colors.body : Colors.secondary
-                }
+                name="link"
+                size={16}
+                color={Colors.body}
+                style={{ transform: [{ rotate: "-45deg" }] }}
               />
+            </View>
+            <Text style={styles.headerTitle}>
+              Link<Text style={styles.headerTitleAccent}>pond</Text>
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => setViewMode((v) => (v === "list" ? "card" : "list"))}
+          >
+            <Ionicons
+              name={viewMode === "list" ? "grid-outline" : "list-outline"}
+              size={22}
+              color={Colors.primary}
+            />
+          </TouchableOpacity>
+        </View>
+        {groups.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContent}
+            style={styles.filter}
+          >
+            <TouchableOpacity
+              style={[styles.chip, !selectedGroupId && styles.chipActive]}
+              onPress={() => setSelectedGroupId(undefined)}
+            >
               <Text
                 style={[
                   styles.chipText,
-                  selectedGroupId === g.id && { color: Colors.body },
+                  !selectedGroupId && styles.chipTextActive,
                 ]}
               >
-                {g.name}
+                All
+              </Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  !selectedGroupId && styles.chipTextActive,
+                ]}
+              >
+                {allLinks.length}
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
+            {groups.map((g: Group) => (
+              <TouchableOpacity
+                key={g.id}
+                style={[
+                  styles.chip,
+                  selectedGroupId === g.id && {
+                    backgroundColor: g.color,
+                    borderColor: g.color,
+                  },
+                ]}
+                onPress={() => setSelectedGroupId(g.id)}
+              >
+                {/* icon stored as string in DB; type-safe cast not possible without runtime validation */}
+
+                <Ionicons
+                  name={g.icon as any}
+                  size={14}
+                  color={selectedGroupId === g.id ? Colors.body : g.color}
+                />
+                <Text
+                  style={[
+                    styles.chipText,
+                    selectedGroupId === g.id && { color: Colors.body },
+                  ]}
+                >
+                  {g.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.chipText,
+                    selectedGroupId === g.id && { color: Colors.body },
+                  ]}
+                >
+                  {groupCounts[g.id] ?? 0}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
       {isLoading ? (
         <ActivityIndicator
           color={Colors.gold}
@@ -116,7 +175,23 @@ const HomeScreen = () => {
           style={{ flex: 1 }}
         />
       ) : links.length === 0 ? (
-        <Text style={styles.empty}>No links saved yet.</Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons
+            name="folder-open-outline"
+            size={48}
+            color={Colors.tertiary}
+          />
+          <Text style={styles.emptyTitle}>Nothing saved yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Tap the button below to save your first link
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyCta}
+            onPress={() => router.push("/add")}
+          >
+            <Text style={styles.emptyCtaText}>+ Save a link</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
           data={links}
@@ -124,6 +199,19 @@ const HomeScreen = () => {
           style={styles.listContainer}
           contentContainerStyle={styles.list}
           renderItem={renderLink}
+          ListHeaderComponent={
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>{links.length} links</Text>
+              <TouchableOpacity style={styles.sortButton}>
+                <Text style={styles.metaText}>Recent</Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={14}
+                  color={Colors.secondary}
+                />
+              </TouchableOpacity>
+            </View>
+          }
         />
       )}
       <TouchableOpacity style={styles.fab} onPress={() => router.push("/add")}>
@@ -134,33 +222,80 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  topBar: {
+    backgroundColor: Colors.header,
+    paddingBottom: Spacing.padding.medium,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.padding.large,
+    paddingTop: Spacing.padding.medium,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+  },
+  logoIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: Spacing.radius.small,
+    backgroundColor: Colors.gold,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.large,
+    fontFamily: Typography.fontFamily,
+    color: Colors.primary,
+    fontWeight: "700",
+  },
+  headerTitleAccent: {
+    color: Colors.gold,
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.body,
+    backgroundColor: Colors.header,
   },
   listContainer: {
     flex: 1,
+    backgroundColor: Colors.body,
   },
   list: {
     padding: Spacing.padding.large,
     gap: Spacing.gap.medium,
     flexShrink: 0,
   },
-  input: {
-    marginHorizontal: Spacing.padding.large,
-    marginTop: Spacing.padding.large,
-    paddingHorizontal: Spacing.padding.medium,
-    paddingVertical: Spacing.padding.small,
-    backgroundColor: Colors.input,
-    borderRadius: Spacing.radius.large,
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.gap.medium,
+    paddingHorizontal: Spacing.padding.large,
+  },
+  emptyTitle: {
     color: Colors.primary,
     fontSize: Typography.fontSize.medium,
-    height: 44,
+    fontWeight: "600",
   },
-  empty: {
-    textAlign: "center",
+  emptySubtitle: {
     color: Colors.secondary,
-    marginTop: Spacing.padding.large,
+    fontSize: Typography.fontSize.small,
+    textAlign: "center",
+  },
+  emptyCta: {
+    backgroundColor: Colors.gold,
+    paddingHorizontal: Spacing.padding.large,
+    paddingVertical: Spacing.padding.medium,
+    borderRadius: Spacing.radius.xlarge,
+    marginTop: Spacing.gap.small,
+  },
+  emptyCtaText: {
+    color: Colors.body,
+    fontWeight: "700",
+    fontSize: Typography.fontSize.medium,
   },
   fab: {
     position: "absolute",
@@ -197,17 +332,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.padding.medium,
     borderRadius: Spacing.radius.xlarge,
     borderWidth: 1,
-    borderColor: Colors.input,
-    backgroundColor: Colors.input,
+    borderColor: Colors.secondary,
+    backgroundColor: "transparent",
     height: CHIP_HEIGHT,
   },
-  chipActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  chipActive: {
+    borderColor: Colors.gold,
+  },
   chipText: {
     color: Colors.secondary,
     fontSize: Typography.fontSize.small,
     lineHeight: Typography.fontLineHeight.small,
   },
-  chipTextActive: { color: Colors.body },
+  chipTextActive: {
+    color: Colors.gold,
+  },
+  chipCount: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.small,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  metaText: {
+    fontSize: Typography.fontSize.small,
+    fontFamily: Typography.fontFamily,
+    color: Colors.secondary,
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
+  },
 });
 
 export default HomeScreen;

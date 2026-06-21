@@ -28,8 +28,14 @@ export default function AddScreen() {
       alert("URL is required.");
       return;
     }
+
+    let normalizedUrl = url.trim();
+    if (!/^https?:\/\//i.test(normalizedUrl)) {
+      normalizedUrl = "https://" + normalizedUrl;
+    }
+
     addLink({
-      url: url.trim(),
+      url: normalizedUrl.trim(),
       title: title.trim(),
       note: note.trim(),
       group_id: selectedGroupId,
@@ -135,7 +141,7 @@ export default function AddScreen() {
         {isPending ? (
           <ActivityIndicator color={Colors.body} />
         ) : (
-          <Text style={styles.saveBtnText}>Save Link</Text>
+          <Text style={styles.saveBtnText}>Save link</Text>
         )}
       </TouchableOpacity>
     </ScrollView>

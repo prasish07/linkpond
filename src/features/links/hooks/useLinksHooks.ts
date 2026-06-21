@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAllLinks,
   getLinkById,
+  getLinkCountsByGroup,
   insertLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
@@ -19,6 +20,16 @@ export const useLinks = (groupId?: string, search?: string) =>
   useQuery({
     queryKey: ["links", groupId, search],
     queryFn: () => getAllLinks(groupId, search),
+  });
+
+export const useGroupLinkCounts = () =>
+  useQuery({
+    queryKey: ["linkCountsByGroup"],
+    queryFn: async () => {
+      const rows = await getLinkCountsByGroup();
+
+      return Object.fromEntries(rows.map((row) => [row.group_id, row.count]));
+    },
   });
 
 export const useLinkById = (id: string) =>

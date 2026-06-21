@@ -126,14 +126,14 @@
 | Dev machine | Ubuntu, 16GB RAM |
 ## Last session
 
-- Date: 2026-06-16 23:39
-- Branch: `feature/phase-5-search-sort`
+- Date: 2026-06-19 22:19
+- Branch: `main`
 
 Recent commits:
 ```
+c29f981 Merge pull request #12 from prasish07/feature/phase-5-search-sort
+5b22c55 feat: Phase 5 — search tab, debounce hook, sort, tab bar icons
 31c3901 Merge pull request #11 from prasish07/feature/phase-4-groups
 bbaf169 chore: update progress.md session log
 88281cd chore: auto-update progress.md on session stop via Claude Code hook
-24afba9 fix: group filter chip height inconsistency on home screen
-6018af6 feat: filter home list by group
 ```
