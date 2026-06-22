@@ -6,18 +6,24 @@ import {
   TouchableOpacity,
   ScrollView,
   Linking,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { Image } from "expo-image";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useCallback, useState } from "react";
-import { useLinkById } from "@/features/links/hooks/useLinksHooks";
+import {
+  useDeleteLink,
+  useLinkById,
+} from "@/features/links/hooks/useLinksHooks";
 import { getBrandInfo } from "@/lib/getBrandInfo";
+import { timeAgo } from "@/lib/timeAgo";
 
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: link, isLoading, refetch } = useLinkById(id);
+  const { mutate: deleteLink } = useDeleteLink();
 
   const [descExpanded, setDescExpanded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -64,20 +70,36 @@ export default function LinkDetailScreen() {
         })()
       )}
 
-      <View style={styles.meta}>
-        {link.favicon_url && (
-          <Image source={{ uri: link.favicon_url }} style={styles.favicon} />
-        )}
-        <Text style={styles.siteName} numberOfLines={1}>
-          {link.site_name ??
-            (() => {
-              try {
-                return new URL(link.url).hostname;
-              } catch {
-                return link.url;
-              }
-            })()}
-        </Text>
+      <View style={styles.metaWrapper}>
+        <View style={styles.meta}>
+          {link.favicon_url && (
+            <Image source={{ uri: link.favicon_url }} style={styles.favicon} />
+          )}
+          <Text style={styles.siteName} numberOfLines={1}>
+            {link.site_name ??
+              (() => {
+                try {
+                  return new URL(link.url).hostname;
+                } catch {
+                  return link.url;
+                }
+              })()}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert("Delete link?", "This can't be undone.", [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Delete",
+                style: "destructive",
+                onPress: () => deleteLink(link.id),
+              },
+            ])
+          }
+        >
+          <Ionicons name="trash-outline" size={20} color={Colors.destructive} />
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.title} numberOfLines={3}>
@@ -105,14 +127,14 @@ export default function LinkDetailScreen() {
 
       {link.note && (
         <View style={styles.noteCard}>
-          <Ionicons
-            name="document-text-outline"
-            size={16}
-            color={Colors.secondary}
-          />
+          <Text style={styles.noteLabel}>MY NOTE</Text>
           <Text style={styles.noteText}>{link.note}</Text>
         </View>
       )}
+      <View style={styles.savedRow}>
+        <Ionicons name="time-outline" size={14} color={Colors.tertiary} />
+        <Text style={styles.savedText}>Saved {timeAgo(link.created_at)}</Text>
+      </View>
 
       <TouchableOpacity
         style={styles.openBtn}
@@ -137,14 +159,19 @@ const styles = StyleSheet.create({
   },
   errorText: { color: Colors.secondary },
   thumbnail: { width: "100%", height: 200 },
+  metaWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.padding.large,
+    paddingBottom: 0,
+    justifyContent: "space-between",
+  },
   meta: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.gap.small,
-    padding: Spacing.padding.large,
-    paddingBottom: 0,
   },
-  favicon: { width: 16, height: 16, borderRadius: 4 },
+  favicon: { width: 16, height: 16, borderRadius: Spacing.radius.xs },
   siteName: { color: Colors.secondary, fontSize: Typography.fontSize.small },
   title: {
     color: Colors.primary,
@@ -160,14 +187,33 @@ const styles = StyleSheet.create({
     lineHeight: Typography.fontLineHeight.medium,
   },
   noteCard: {
-    flexDirection: "row",
-    gap: Spacing.gap.small,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.gold,
     backgroundColor: Colors.card,
     margin: Spacing.padding.large,
+    marginTop: 0,
     padding: Spacing.padding.medium,
     borderRadius: Spacing.radius.medium,
+    gap: Spacing.gap.xs,
+  },
+  noteLabel: {
+    fontSize: Typography.fontSize.small,
+    fontWeight: "700",
+    color: Colors.gold,
+    letterSpacing: 0.8,
   },
   noteText: { color: Colors.secondary, flex: 1 },
+  savedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
+    paddingHorizontal: Spacing.padding.large,
+    marginTop: Spacing.gap.medium,
+  },
+  savedText: {
+    fontSize: Typography.fontSize.small,
+    color: Colors.tertiary,
+  },
   openBtn: {
     flexDirection: "row",
     alignItems: "center",

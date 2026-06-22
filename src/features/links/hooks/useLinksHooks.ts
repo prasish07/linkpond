@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteLink,
   getAllLinks,
   getLinkById,
   getLinkCountsByGroup,
@@ -62,6 +63,19 @@ export const useAddLink = () => {
     onError: (error) => {
       console.error("Failed to add link:", error);
       alert("Failed to add link. Please try again.");
+    },
+  });
+};
+
+export const useDeleteLink = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteLink(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      router.back();
     },
   });
 };
