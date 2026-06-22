@@ -30,6 +30,7 @@ const HomeScreen = () => {
     undefined
   );
   const [viewMode, setViewMode] = useState<"card" | "list">("list");
+  const [sort, setSort] = useState<"recent" | "oldest">("recent");
 
   const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
   const { data: allLinks = [] } = useLinks(undefined, undefined);
@@ -43,6 +44,8 @@ const HomeScreen = () => {
       refetch();
     }, [refetch])
   );
+
+  const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
@@ -194,7 +197,7 @@ const HomeScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={links}
+          data={sortedLinks}
           keyExtractor={(item) => item.id}
           style={styles.listContainer}
           contentContainerStyle={styles.list}
@@ -202,10 +205,17 @@ const HomeScreen = () => {
           ListHeaderComponent={
             <View style={styles.metaRow}>
               <Text style={styles.metaText}>{links.length} links</Text>
-              <TouchableOpacity style={styles.sortButton}>
-                <Text style={styles.metaText}>Recent</Text>
+              <TouchableOpacity
+                style={styles.sortButton}
+                onPress={() =>
+                  setSort((s) => (s === "recent" ? "oldest" : "recent"))
+                }
+              >
+                <Text style={styles.metaText}>
+                  {sort === "recent" ? "Recent" : "Oldest"}
+                </Text>
                 <Ionicons
-                  name="chevron-down"
+                  name={sort === "recent" ? "chevron-down" : "chevron-up"}
                   size={14}
                   color={Colors.secondary}
                 />
