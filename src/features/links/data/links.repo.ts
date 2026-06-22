@@ -28,6 +28,14 @@ export const getAllLinks = async (
   );
 };
 
+export const getLinkCountsByGroup = async (): Promise<
+  { group_id: string; count: number }[]
+> => {
+  return db.getAllAsync<{ group_id: string; count: number }>(
+    `SELECT group_id, COUNT(*) as count FROM links WHERE group_id IS NOT NULL AND is_archived = 0 GROUP BY group_id`
+  );
+};
+
 export const insertLink = async (
   link: Omit<Link, "created_at" | "updated_at" | "is_archived">
 ): Promise<void> => {
@@ -70,4 +78,8 @@ export const updateLinkPreview = async (
       id,
     ]
   );
+};
+
+export const deleteLink = async (id: string): Promise<void> => {
+  await db.runAsync(`DELETE FROM links WHERE id = ?`, [id]);
 };
