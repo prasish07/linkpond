@@ -9,6 +9,7 @@ export const Colors = {
   destructive: "#D6897A",
   tertiary: "#746F65",
   confirm: "#9DBE8E",
+  scrim: "rgba(0,0,0,0.5)",
 };
 
 export const Spacing = {

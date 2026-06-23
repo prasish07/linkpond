@@ -69,13 +69,13 @@ Target: `22-54-26`
 
 Target: `22-54-38` (empty), `22-54-50`/`22-55-08` (YouTube), `22-55-23`/`22-55-28` (Instagram), `22-55-48` (shared)
 
-- [ ] `[fix]` Presented as a **full screen**; design is a **bottom sheet** ("Add a link" / "Save to Linkpond" + "Shared from YouTube" when shared).
-- [ ] `[feature]` Missing **live preview fetch** — URL field should resolve into a preview card ("Fetching preview…" → thumbnail/title/duration). Title is currently a manual text field.
-- [ ] `[feature]` Missing **"Try: YouTube link / Instagram link"** suggestion chips on the empty paste state.
-- [ ] `[feature]` Missing **TAGS** input (add/remove tag chips).
-- [ ] `[feature]` Missing **"Remind me"** toggle row.
+- [x] `[fix]` Presented as a **full screen** → **DONE**: now a `@gorhom/bottom-sheet` (snap points `["50%","90%"]`, `keyboardBehavior="extend"`, fade-in route animation, slide-down close). `"Save to Linkpond"`/`"Shared from YouTube"` variants still TODO.
+- [ ] `[feature]` Missing **live preview fetch** — URL field should resolve into a preview card ("Fetching preview…" → thumbnail/title/duration). Title is currently a manual text field. **(Slice B — next)**
+- [ ] `[feature]` Missing **"Try: YouTube link / Instagram link"** suggestion chips on the empty paste state. **(Slice A — next)**
+- [ ] `[feature]` Missing **TAGS** input (add/remove tag chips). **(Slice D — needs `link_tags` repo layer)**
+- [ ] `[feature]` Missing **"Remind me"** toggle row. **(Slice E — UI now, scheduling is Phase 8)**
 - [ ] `[fix]` Missing **Cancel** button; design has Cancel + Save side by side.
-- [x] `[fix]` Button label "Save Link" → **FIXED**: now "Save link" sentence case (`add.tsx:144`).
+- [x] `[fix]` Button label "Save Link" → **FIXED**: now "Save link" sentence case (`add.tsx:111`).
 
 ## 8. Bottom navigation — `app/(tabs)/_layout.tsx`
 
@@ -89,11 +89,16 @@ Target: all screens (4-tab bar)
 
 1. ~~Copy fixes: "Open original", "Save link", "Create group"~~ ✅ Done
 2. ~~Groups screen header + counts + chevron + inline "+ New group" button~~ ✅ Done
-3. LinkCard: group dot/label, relative time, reminder bell `[fix]`
-4. List empty state with icon + CTA `[fix]`
-5. Link-detail note "MY NOTE" label + gold border; Saved row `[fix]`
-6. Convert Add + New-group screens to bottom sheets `[fix]`
+3. ~~LinkCard: group dot/label, relative time~~ ✅ Done (reminder bell deferred — reminders not built)
+4. ~~List empty state with icon + CTA~~ ✅ Done
+5. ~~Link-detail note "MY NOTE" label + gold border; Saved row~~ ✅ Done
+6. Convert Add + New-group screens to bottom sheets `[fix]` — **Add ✅ done; New-group (`group/create.tsx`) still full-screen**
 7. Link-detail Group/Tags/Saved/Reminder sections `[feature]`
-8. Add-link preview fetch + tags + remind toggle `[feature]`
+8. Add-link redesign `[feature]` — **IN PROGRESS**, sliced:
+   - A. Empty state: "Paste a link…" + Try chips + Cancel/disabled Save
+   - B. Live preview fetch (debounced URL → `fetchPreview` → skeleton → preview card) ← **next**
+   - C. Group chips restyle
+   - D. Tags input (needs `link_tags` repo layer)
+   - E. Remind toggle (UI now; scheduling deferred to Phase 8)
 9. Search: extra filter chips + recent searches `[feature]`
 10. Resurface tab `[v2]`

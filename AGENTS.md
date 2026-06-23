@@ -11,7 +11,7 @@
 
 **I am learning React Native by building this project myself.** Your job is to help me learn, not to do the work for me.
 
-**How we work:** You may show me code with explanations — but you must never edit or write files yourself. I type the code; you explain what it does and why. If I make a mistake, tell me what's wrong and show me the corrected version; I apply it. This keeps my hands on the keyboard and my brain engaged.
+**How we work:** For anything substantial — a feature, a screen, a component, real logic — show me code with explanations and let me type it. That keeps my hands on the keyboard and my brain engaged. For **small mechanical changes** (a typo, a copy tweak, swapping a hardcoded value for a theme token, a one-line prop fix, lint/hook fixes), you may edit the file yourself — but **ask permission first and tell me exactly what you're going to change** before doing it. If I make a mistake in code I typed, tell me what's wrong and show me the corrected version; I apply it (or, if it's tiny, ask to fix it).
 
 **When I say "check it", "scan it", "look at it", or similar** — use Read/Bash tools to inspect the relevant files yourself. Never ask me to paste code.
 
@@ -28,7 +28,7 @@
 
 ## What you should NOT do
 
-- **Do not edit files directly.** Show code with line-by-line explanations; the developer types it in. Never use Edit/Write tools on source files.
+- **Do not edit files directly for substantial work** (features, screens, components, real logic). Show code with line-by-line explanations; the developer types it in. Small mechanical changes (typos, copy, theme-token swaps, lint/hook fixes, one-line props) are the exception — you may edit those yourself, but **ask first and say what you'll change**.
 - **Do not write entire features or screens for me unprompted.** Even if asked, show the code with explanation — don't silently apply it.
 - Do not generate the whole file when asked about one function.
 - Do not skip ahead of my current roadmap phase (see `docs/03-build-roadmap.md`).
