@@ -16,11 +16,28 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { ScrollView } from "react-native-gesture-handler";
+import { fetchPreview, LinkPreview } from "@/lib/fetchPreview";
+import useDebounce from "@/lib/useDebounce";
+import { useQuery } from "@tanstack/react-query";
+import { Image } from "expo-image";
 
 const CLOSE_ICON_SIZE = 22;
 const NOTE_INPUT_HEIGHT = 80;
 const DOT_SIZE = 7;
 const LABEL_LETTER_SPACING = 0.5;
+const HEADER_BADGE_SIZE = 28;
+const BADGE_ICON_SIZE = 18;
+const SECTION_ICON_SIZE = 14;
+const PREVIEW_FALLBACK_ICON_SIZE = 24;
+
+type PreviewState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "loaded"; data: LinkPreview }
+  | { status: "error" };
+
+const PREVIEW_THUMB_SIZE = 72;
+const SKELETON_LINE_HEIGHT = 10;
 
 export default function AddScreen() {
   const router = useRouter();
@@ -29,11 +46,41 @@ export default function AddScreen() {
   const { data: groups = [] } = useGroups();
 
   const [url, setUrl] = useState("");
-  const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const debouncedUrl = useDebounce(url, 500);
+  const trimmedUrl = debouncedUrl.trim();
+  const normalizedUrl = trimmedUrl
+    ? /^https?:\/\//i.test(trimmedUrl)
+      ? trimmedUrl
+      : "https://" + trimmedUrl
+    : "";
+
+  const { data: previewData, isFetching } = useQuery({
+    queryKey: ["preview", normalizedUrl],
+    queryFn: () => fetchPreview(normalizedUrl),
+    enabled: normalizedUrl.length > 0, // don't fetch on empty URL
+    staleTime: 5 * 60 * 1000, // cache previews for 5 min
+  });
+
+  const isSettled = url.trim() === trimmedUrl; // has the debounce caught up to what I typed?
+
+  const previewState: PreviewState = !url.trim()
+    ? { status: "idle" }
+    : !isSettled || isFetching
+      ? { status: "loading" }
+      : previewData &&
+          (previewData.title ||
+            previewData.thumbnail_url ||
+            previewData.site_name)
+        ? { status: "loaded", data: previewData }
+        : { status: "error" };
+
+  // can save once the URL resolves — with a preview (loaded) or without (error/blocked)
+  const canSave =
+    previewState.status === "loaded" || previewState.status === "error";
 
   const handleClose = () => sheetRef.current?.close();
 
@@ -42,13 +89,17 @@ export default function AddScreen() {
       alert("URL is required.");
       return;
     }
+
+    const previewTitle =
+      previewState.status === "loaded" ? (previewState.data.title ?? "") : "";
+
     let normalizedUrl = url.trim();
     if (!/^https?:\/\//i.test(normalizedUrl)) {
       normalizedUrl = "https://" + normalizedUrl;
     }
     addLink({
       url: normalizedUrl,
-      title: title.trim(),
+      title: previewTitle,
       note: note.trim(),
       group_id: selectedGroupId,
     });
@@ -74,8 +125,13 @@ export default function AddScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Add a link</Text>
-            <TouchableOpacity onPress={handleClose}>
+            <View style={styles.headerLeft}>
+              <View style={styles.headerBadge}>
+                <Ionicons name="add" size={BADGE_ICON_SIZE} color={Colors.body} />
+              </View>
+              <Text style={styles.headerTitle}>Add a link</Text>
+            </View>
+            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
               <Ionicons
                 name="close"
                 size={CLOSE_ICON_SIZE}
@@ -93,15 +149,93 @@ export default function AddScreen() {
             autoCapitalize="none"
             keyboardType="url"
           />
+          {previewState.status === "idle" && (
+            <View style={styles.tryRow}>
+              <Text style={styles.tryLabel}>Try:</Text>
+              <TouchableOpacity
+                style={styles.tryChip}
+                onPress={() => setUrl("https://youtube.com/")}
+              >
+                <Text style={styles.tryChipText}>YouTube link</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.tryChip}
+                onPress={() => setUrl("https://instagram.com/")}
+              >
+                <Text style={styles.tryChipText}>Instagram link</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {previewState.status === "loading" && (
+            <View style={styles.previewCard}>
+              <View style={styles.previewThumbFallback} />
+              <View style={styles.previewBody}>
+                <View style={styles.skeletonLine} />
+                <View style={[styles.skeletonLine, { width: "60%" }]} />
+                <View style={styles.fetchingRow}>
+                  <ActivityIndicator size="small" color={Colors.tertiary} />
+                  <Text style={styles.fetchingText}>Fetching preview…</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {previewState.status === "loaded" && (
+            <View style={styles.previewCard}>
+              {previewState.data.thumbnail_url ? (
+                <Image
+                  source={{ uri: previewState.data.thumbnail_url }}
+                  style={styles.previewThumb}
+                  contentFit="cover"
+                />
+              ) : (
+                <View
+                  style={[styles.previewThumb, styles.previewThumbCentered]}
+                >
+                  <Ionicons
+                    name="link"
+                    size={PREVIEW_FALLBACK_ICON_SIZE}
+                    color={Colors.tertiary}
+                  />
+                </View>
+              )}
+              <View style={styles.previewBody}>
+                <Text style={styles.previewTitle} numberOfLines={2}>
+                  {previewState.data.title ?? normalizedUrl}
+                </Text>
+                {previewState.data.site_name && (
+                  <Text style={styles.previewSite} numberOfLines={1}>
+                    {previewState.data.site_name}
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
+
+          {previewState.status === "error" && (
+            <View style={styles.previewCard}>
+              <View style={[styles.previewThumb, styles.previewThumbCentered]}>
+                <Ionicons name="link" size={24} color={Colors.tertiary} />
+              </View>
+              <View style={styles.previewBody}>
+                <Text style={styles.previewTitle} numberOfLines={1}>
+                  {normalizedUrl}
+                </Text>
+                <Text style={styles.previewSite}>No preview available</Text>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.sectionLabelRow}>
+            <Ionicons
+              name="bookmark-outline"
+              size={SECTION_ICON_SIZE}
+              color={Colors.secondary}
+            />
+            <Text style={styles.label}>NOTE</Text>
+          </View>
           <BottomSheetTextInput
-            placeholder="Title (optional)"
-            placeholderTextColor={Colors.tertiary}
-            value={title}
-            onChangeText={setTitle}
-            style={styles.input}
-          />
-          <BottomSheetTextInput
-            placeholder="Note (optional)"
+            placeholder="Why are you saving this?"
             placeholderTextColor={Colors.tertiary}
             value={note}
             onChangeText={setNote}
@@ -111,7 +245,14 @@ export default function AddScreen() {
           />
           {groups.length > 0 && (
             <>
-              <Text style={styles.label}>GROUP</Text>
+              <View style={styles.sectionLabelRow}>
+                <Ionicons
+                  name="folder-outline"
+                  size={SECTION_ICON_SIZE}
+                  color={Colors.secondary}
+                />
+                <Text style={styles.label}>GROUP</Text>
+              </View>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -169,17 +310,29 @@ export default function AddScreen() {
             </>
           )}
 
-          <TouchableOpacity
-            style={styles.saveBtn}
-            onPress={handleAdd}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <ActivityIndicator color={Colors.body} />
-            ) : (
-              <Text style={styles.saveBtnText}>Save link</Text>
-            )}
-          </TouchableOpacity>
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={handleClose}>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+              onPress={handleAdd}
+              disabled={!canSave || isPending}
+            >
+              {isPending ? (
+                <ActivityIndicator color={Colors.body} />
+              ) : (
+                <Text
+                  style={[
+                    styles.saveBtnText,
+                    !canSave && styles.saveBtnTextDisabled,
+                  ]}
+                >
+                  Save link
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </BottomSheetScrollView>
       </BottomSheet>
     </View>
@@ -207,10 +360,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: Spacing.gap.small,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+  },
+  headerBadge: {
+    width: HEADER_BADGE_SIZE,
+    height: HEADER_BADGE_SIZE,
+    borderRadius: Spacing.radius.small,
+    backgroundColor: Colors.gold,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeBtn: {
+    width: HEADER_BADGE_SIZE,
+    height: HEADER_BADGE_SIZE,
+    borderRadius: HEADER_BADGE_SIZE / 2,
+    backgroundColor: Colors.input,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     color: Colors.primary,
     fontSize: Typography.fontSize.large,
     fontWeight: "700",
+  },
+  sectionLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
   },
   input: {
     backgroundColor: Colors.input,
@@ -220,18 +399,38 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.medium,
   },
   noteInput: { height: NOTE_INPUT_HEIGHT, textAlignVertical: "top" },
+  footer: {
+    flexDirection: "row",
+    gap: Spacing.gap.medium,
+    marginTop: Spacing.gap.medium,
+  },
+  cancelBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.input,
+    padding: Spacing.padding.medium,
+    borderRadius: Spacing.radius.medium,
+    alignItems: "center",
+  },
+  cancelBtnText: {
+    color: Colors.secondary,
+    fontWeight: "700",
+    fontSize: Typography.fontSize.medium,
+  },
   saveBtn: {
+    flex: 1,
     backgroundColor: Colors.gold,
     padding: Spacing.padding.medium,
     borderRadius: Spacing.radius.medium,
     alignItems: "center",
-    marginTop: Spacing.gap.medium,
   },
+  saveBtnDisabled: { backgroundColor: Colors.input },
   saveBtnText: {
     color: Colors.body,
     fontWeight: "700",
     fontSize: Typography.fontSize.medium,
   },
+  saveBtnTextDisabled: { color: Colors.tertiary },
   label: {
     color: Colors.secondary,
     fontSize: Typography.fontSize.small,
@@ -256,5 +455,66 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.small,
   },
   groupChipTextSelected: { color: Colors.gold },
-  groupDot: { width: DOT_SIZE, height: DOT_SIZE, borderRadius: Spacing.radius.xs },
+  groupDot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: Spacing.radius.xs,
+  },
+  tryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    flexWrap: "wrap",
+  },
+  tryLabel: { color: Colors.tertiary, fontSize: Typography.fontSize.small },
+  tryChip: {
+    borderWidth: 1,
+    borderColor: Colors.input,
+    borderRadius: Spacing.radius.xlarge,
+    paddingHorizontal: Spacing.padding.medium,
+    paddingVertical: Spacing.padding.small,
+  },
+  tryChipText: { color: Colors.secondary, fontSize: Typography.fontSize.small },
+
+  previewCard: {
+    flexDirection: "row",
+    gap: Spacing.gap.medium,
+    alignItems: "center",
+    backgroundColor: Colors.input,
+    borderRadius: Spacing.radius.medium,
+    padding: Spacing.padding.medium,
+  },
+  previewThumb: {
+    width: PREVIEW_THUMB_SIZE,
+    height: PREVIEW_THUMB_SIZE,
+    borderRadius: Spacing.radius.small,
+    backgroundColor: Colors.card,
+  },
+  previewThumbFallback: {
+    width: PREVIEW_THUMB_SIZE,
+    height: PREVIEW_THUMB_SIZE,
+    borderRadius: Spacing.radius.small,
+    backgroundColor: Colors.card,
+  },
+  previewThumbCentered: { justifyContent: "center", alignItems: "center" },
+  previewBody: { flex: 1, gap: Spacing.gap.xs },
+  previewTitle: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.medium,
+    fontWeight: "600",
+  },
+  previewSite: { color: Colors.secondary, fontSize: Typography.fontSize.small },
+  skeletonLine: {
+    height: SKELETON_LINE_HEIGHT,
+    width: "100%",
+    borderRadius: Spacing.radius.xs,
+    backgroundColor: Colors.card,
+  },
+  fetchingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
+    marginTop: Spacing.gap.xs,
+  },
+  fetchingText: { color: Colors.tertiary, fontSize: Typography.fontSize.small },
 });
