@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -82,6 +82,13 @@ export default function AddScreen() {
   const canSave =
     previewState.status === "loaded" || previewState.status === "error";
 
+  // idle hugs the minimal content; once a link is entered the sheet grows.
+  // "90%" stays as the keyboard-extend ceiling in both states.
+  const snapPoints = useMemo(
+    () => (previewState.status === "idle" ? ["30%", "90%"] : ["60%", "90%"]),
+    [previewState.status]
+  );
+
   const handleClose = () => sheetRef.current?.close();
 
   const handleAdd = () => {
@@ -109,7 +116,7 @@ export default function AddScreen() {
     <View style={styles.overlay}>
       <BottomSheet
         ref={sheetRef}
-        snapPoints={["50%", "90%"]} // closed-ish at 50%, tall at 90%
+        snapPoints={snapPoints} // idle: small; entered: taller; 90% = keyboard ceiling
         enableDynamicSizing={false} // respect the snap points
         keyboardBehavior="extend" // keyboard opens → jump to90% (above keyboard)
         keyboardBlurBehavior="restore" // keyboard closes → back to 50%
@@ -127,7 +134,11 @@ export default function AddScreen() {
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.headerBadge}>
-                <Ionicons name="add" size={BADGE_ICON_SIZE} color={Colors.body} />
+                <Ionicons
+                  name="add"
+                  size={BADGE_ICON_SIZE}
+                  color={Colors.body}
+                />
               </View>
               <Text style={styles.headerTitle}>Add a link</Text>
             </View>
@@ -140,15 +151,22 @@ export default function AddScreen() {
             </TouchableOpacity>
           </View>
 
-          <BottomSheetTextInput
-            placeholder="URL *"
-            placeholderTextColor={Colors.tertiary}
-            value={url}
-            onChangeText={setUrl}
-            style={styles.input}
-            autoCapitalize="none"
-            keyboardType="url"
-          />
+          <View style={styles.urlRow}>
+            <Ionicons
+              name="link-outline"
+              size={SECTION_ICON_SIZE}
+              color={Colors.tertiary}
+            />
+            <BottomSheetTextInput
+              placeholder="Paste a link…"
+              placeholderTextColor={Colors.tertiary}
+              value={url}
+              onChangeText={setUrl}
+              style={styles.urlInput}
+              autoCapitalize="none"
+              keyboardType="url"
+            />
+          </View>
           {previewState.status === "idle" && (
             <View style={styles.tryRow}>
               <Text style={styles.tryLabel}>Try:</Text>
@@ -215,7 +233,11 @@ export default function AddScreen() {
           {previewState.status === "error" && (
             <View style={styles.previewCard}>
               <View style={[styles.previewThumb, styles.previewThumbCentered]}>
-                <Ionicons name="link" size={24} color={Colors.tertiary} />
+                <Ionicons
+                  name="link"
+                  size={PREVIEW_FALLBACK_ICON_SIZE}
+                  color={Colors.tertiary}
+                />
               </View>
               <View style={styles.previewBody}>
                 <Text style={styles.previewTitle} numberOfLines={1}>
@@ -226,87 +248,93 @@ export default function AddScreen() {
             </View>
           )}
 
-          <View style={styles.sectionLabelRow}>
-            <Ionicons
-              name="bookmark-outline"
-              size={SECTION_ICON_SIZE}
-              color={Colors.secondary}
-            />
-            <Text style={styles.label}>NOTE</Text>
-          </View>
-          <BottomSheetTextInput
-            placeholder="Why are you saving this?"
-            placeholderTextColor={Colors.tertiary}
-            value={note}
-            onChangeText={setNote}
-            style={[styles.input, styles.noteInput]}
-            multiline
-            numberOfLines={3}
-          />
-          {groups.length > 0 && (
+          {previewState.status !== "idle" && (
             <>
               <View style={styles.sectionLabelRow}>
                 <Ionicons
-                  name="folder-outline"
+                  name="bookmark-outline"
                   size={SECTION_ICON_SIZE}
                   color={Colors.secondary}
                 />
-                <Text style={styles.label}>GROUP</Text>
+                <Text style={styles.label}>NOTE</Text>
               </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.groupRow}
-                keyboardShouldPersistTaps="handled"
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.groupChip,
-                    !selectedGroupId && styles.groupChipSelected,
-                  ]}
-                  onPress={() => setSelectedGroupId(undefined)}
-                >
-                  <Text
-                    style={[
-                      styles.groupChipText,
-                      !selectedGroupId && styles.groupChipTextSelected,
-                    ]}
-                  >
-                    None
-                  </Text>
-                </TouchableOpacity>
-                {groups.map((g) => (
-                  <TouchableOpacity
-                    key={g.id}
-                    style={[
-                      styles.groupChip,
-                      selectedGroupId === g.id && {
-                        backgroundColor: g.color,
-                        borderColor: g.color,
-                      },
-                    ]}
-                    onPress={() => setSelectedGroupId(g.id)}
-                  >
-                    <View
-                      style={[
-                        styles.groupDot,
-                        {
-                          backgroundColor:
-                            selectedGroupId === g.id ? Colors.body : g.color,
-                        },
-                      ]}
+              <BottomSheetTextInput
+                placeholder="Why are you saving this?"
+                placeholderTextColor={Colors.tertiary}
+                value={note}
+                onChangeText={setNote}
+                style={[styles.input, styles.noteInput]}
+                multiline
+                numberOfLines={3}
+              />
+              {groups.length > 0 && (
+                <>
+                  <View style={styles.sectionLabelRow}>
+                    <Ionicons
+                      name="folder-outline"
+                      size={SECTION_ICON_SIZE}
+                      color={Colors.secondary}
                     />
-                    <Text
+                    <Text style={styles.label}>GROUP</Text>
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.groupRow}
+                    keyboardShouldPersistTaps="handled"
+                  >
+                    <TouchableOpacity
                       style={[
-                        styles.groupChipText,
-                        selectedGroupId === g.id && { color: Colors.body },
+                        styles.groupChip,
+                        !selectedGroupId && styles.groupChipSelected,
                       ]}
+                      onPress={() => setSelectedGroupId(undefined)}
                     >
-                      {g.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                      <Text
+                        style={[
+                          styles.groupChipText,
+                          !selectedGroupId && styles.groupChipTextSelected,
+                        ]}
+                      >
+                        None
+                      </Text>
+                    </TouchableOpacity>
+                    {groups.map((g) => (
+                      <TouchableOpacity
+                        key={g.id}
+                        style={[
+                          styles.groupChip,
+                          selectedGroupId === g.id && {
+                            backgroundColor: g.color,
+                            borderColor: g.color,
+                          },
+                        ]}
+                        onPress={() => setSelectedGroupId(g.id)}
+                      >
+                        <View
+                          style={[
+                            styles.groupDot,
+                            {
+                              backgroundColor:
+                                selectedGroupId === g.id
+                                  ? Colors.body
+                                  : g.color,
+                            },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.groupChipText,
+                            selectedGroupId === g.id && { color: Colors.body },
+                          ]}
+                        >
+                          {g.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </>
+              )}
             </>
           )}
 
@@ -397,6 +425,20 @@ const styles = StyleSheet.create({
     padding: Spacing.padding.medium,
     borderRadius: Spacing.radius.medium,
     fontSize: Typography.fontSize.medium,
+  },
+  urlRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    backgroundColor: Colors.input,
+    borderRadius: Spacing.radius.medium,
+    paddingHorizontal: Spacing.padding.medium,
+  },
+  urlInput: {
+    flex: 1,
+    color: Colors.primary,
+    fontSize: Typography.fontSize.medium,
+    paddingVertical: Spacing.padding.medium,
   },
   noteInput: { height: NOTE_INPUT_HEIGHT, textAlignVertical: "top" },
   footer: {
