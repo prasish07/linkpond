@@ -64,7 +64,8 @@ export const fetchPreview = async (url: string): Promise<LinkPreview> => {
     return {
       title: title ? decodeHtmlEntities(title) : null,
       description: description ? decodeHtmlEntities(description) : null,
-      thumbnail_url: getMetaContent(html, "og:image"),
+      thumbnail_url:
+        decodeHtmlEntities(getMetaContent(html, "og:image") ?? "") || null,
       site_name: siteName ? decodeHtmlEntities(siteName) : null,
       favicon_url: new URL("/favicon.ico", url).href,
     };

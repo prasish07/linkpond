@@ -32,7 +32,8 @@
       "expo-font",
       "expo-sqlite",
       "expo-image",
-      "expo-share-intent"
+      "expo-share-intent",
+      "./plugins/withFinishActivity"
     ],
     "extra": {
       "router": {},
