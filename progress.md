@@ -4,10 +4,10 @@
 
 ---
 
-## Current phase: Phase 6b — Popup-over-other-app (stretch goal)
+## Current phase: Phase 7 — Clipboard auto-detect
 
-**Learning goal:** native Android Activity config, translucent/dialog themes, config plugins / prebuild, returning focus to the previous app.
-**Build goal:** The share opens a floating popup over the app you were in (dimmed behind), not a full-screen takeover.
+**Learning goal:** `expo-clipboard`, app-foreground lifecycle, non-intrusive UI patterns.
+**Build goal:** Open the app with a URL copied → "Save this?" banner.
 
 ---
 
@@ -75,6 +75,14 @@
 - Verified: Chrome → Share → same flow works
 - Android emulator: connect to dev server via `http://10.0.2.2:8081` (emulator can't use host LAN IP)
 
+### Phase 6b — Return to source app after share-intent save ✅
+- `plugins/withFinishActivity.js` — config plugin that writes `FinishActivityModule.kt` + `FinishActivityPackage.kt` into the Android project and patches `MainApplication.kt` using `.also { it.add(FinishActivityPackage()) }` on `PackageList(this).packages`
+- `src/lib/finishActivity.ts` — JS wrapper calling `NativeModules.FinishActivity.finish()` which calls `moveTaskToBack(true)` on Android
+- `useAddLink` updated to accept `onSuccess` option — fixes React Query lifecycle issue where per-call callbacks were cancelled after component unmount
+- `fetchPreview.ts` — decode HTML entities on `og:image` URL (fixes missing thumbnails on Facebook links)
+- `group/create.tsx` — converted to `@gorhom/bottom-sheet` (matches Add sheet pattern)
+- Key lesson: Expo SDK 56 uses bridgeless New Architecture (`ExpoReactHostFactory`) — `withMainApplication` string replacement must target `PackageList(this).packages` directly via `.also {}` idiom
+
 ### Add sheet polish (between Phase 5 and 6a) ✅
 - Bottom sheet converted from fixed snap to dynamic snap points
 - Idle state: `35%` / `90%`; URL entered: `60%` / `90%`
@@ -101,8 +109,8 @@
 | 4 | ✅ Done | Groups & tags — many-to-many, filter by group |
 | 5 | ✅ Done | Search & sort — debounced input, SQLite FTS5 or in-memory |
 | 6a | ✅ Done | Share intent — receive URLs from other apps via Android share sheet |
-| 6b | Next | Popup-over-app theming — translucent Activity, native config plugin |
-| 7 | | Clipboard auto-detect — foreground lifecycle |
+| 6b | ✅ Done | Return to source app after share-intent save — config plugin + moveTaskToBack |
+| 7 | Next | Clipboard auto-detect — foreground lifecycle |
 | 8 | | Reminders — local notifications, deep link from notification |
 | 9 | | Polish — empty states, skeletons, app icon, splash |
 | 10 (v2) | | Spaced resurfacing engine |
@@ -141,23 +149,21 @@
 
 - **"+ New group" in Add sheet** — add a `+` chip at the end of the group row. Tapping it opens the Create Group sheet stacked on top of the Add sheet. After save, new group auto-selects in Add sheet. Design decision: stacked sheet (not inline expansion) to keep the Add sheet focused.
 - **Home screen safe area fix** — `SafeAreaView` on index.tsx should use `edges={['top']}` (tab bar handles bottom). Also revert `container` background from debug red back to `Colors.body`.
+- **Duplicate URL detection (future)** — on URL entry in Add sheet, after preview loads, query DB for matching URL. If found and `opened_at IS NULL` → "You saved this on [date] and haven't opened it — open it or save again?". If found and `opened_at` set → softer "Already in your list". Requires adding `opened_at` column to `links` table and writing it when a link card is tapped.
 
 ---
 
 ## Last session
 
 - Date: 2026-06-27
-- Branch: `main` (after merging `feature/phase-6a-share-intent`)
+- Branch: `main` (after merging `feature/phase-6b-return-to-source-app`)
 
 Recent PRs merged this session:
-- PR #18 — Add sheet live preview + progressive disclosure (`feature/add-live-preview`)
-- PR #19 — Phase 6a share intent (`feature/phase-6a-share-intent`)
+- PR #20 — Phase 6b return to source app + group create sheet + fetchPreview fix (`feature/phase-6b-return-to-source-app`)
 
 Recent commits:
 ```
+512efa9 Merge pull request #20 from prasish07/feature/phase-6b-return-to-source-app
+b8d261e feat: Phase 6b — return to source app after share-intent save
 bea944a Merge pull request #19 from prasish07/feature/phase-6a-share-intent
-e9ade12 feat: Phase 6a — share intent, receive URLs from other apps into Add sheet
-06bd270 Merge pull request #18 from prasish07/feature/add-live-preview
-d9fd9ab feat: dynamic snap points + progressive disclosure on Add sheet
-ff6e082 feat: Add sheet live preview + design polish
 ```

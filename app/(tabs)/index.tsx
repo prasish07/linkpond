@@ -21,6 +21,8 @@ import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { timeAgo } from "@/lib/timeAgo";
+import { useClipboardDetect } from "@/lib/useClipboardDetect";
+import { ClipboardBanner } from "@/features/links/components/ClipboardBanner";
 
 const FAB_SIZE = 56;
 const CHIP_HEIGHT = 26;
@@ -38,6 +40,7 @@ const HomeScreen = () => {
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
   const router = useRouter();
   const { data: groupCounts = {} } = useGroupLinkCounts();
+  const { clipboardUrl, dismiss } = useClipboardDetect();
 
   useFocusEffect(
     useCallback(() => {
@@ -75,7 +78,7 @@ const HomeScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.topBar}>
         {/* header always visible */}
         <View style={styles.header}>
@@ -203,23 +206,28 @@ const HomeScreen = () => {
           contentContainerStyle={styles.list}
           renderItem={renderLink}
           ListHeaderComponent={
-            <View style={styles.metaRow}>
-              <Text style={styles.metaText}>{links.length} links</Text>
-              <TouchableOpacity
-                style={styles.sortButton}
-                onPress={() =>
-                  setSort((s) => (s === "recent" ? "oldest" : "recent"))
-                }
-              >
-                <Text style={styles.metaText}>
-                  {sort === "recent" ? "Recent" : "Oldest"}
-                </Text>
-                <Ionicons
-                  name={sort === "recent" ? "chevron-down" : "chevron-up"}
-                  size={14}
-                  color={Colors.secondary}
-                />
-              </TouchableOpacity>
+            <View>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaText}>{links.length} links</Text>
+                <TouchableOpacity
+                  style={styles.sortButton}
+                  onPress={() =>
+                    setSort((s) => (s === "recent" ? "oldest" : "recent"))
+                  }
+                >
+                  <Text style={styles.metaText}>
+                    {sort === "recent" ? "Recent" : "Oldest"}
+                  </Text>
+                  <Ionicons
+                    name={sort === "recent" ? "chevron-down" : "chevron-up"}
+                    size={14}
+                    color={Colors.secondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              {clipboardUrl && (
+                <ClipboardBanner url={clipboardUrl} onDismiss={dismiss} />
+              )}
             </View>
           }
         />
