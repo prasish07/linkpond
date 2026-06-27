@@ -39,7 +39,7 @@ export const useLinkById = (id: string) =>
     queryFn: () => getLinkById(id),
   });
 
-export const useAddLink = () => {
+export const useAddLink = (options?: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -58,7 +58,7 @@ export const useAddLink = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
-      router.back();
+      options?.onSuccess ? options.onSuccess() : router.back();
     },
     onError: (error) => {
       console.error("Failed to add link:", error);

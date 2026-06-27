@@ -20,6 +20,7 @@ import useDebounce from "@/lib/useDebounce";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { finishActivity } from "@/lib/finishActivity";
 
 const CLOSE_ICON_SIZE = 22;
 const NOTE_INPUT_HEIGHT = 80;
@@ -45,7 +46,12 @@ const SNAP_TALL = "90%";
 export default function AddScreen() {
   const router = useRouter();
   const sheetRef = useRef<BottomSheet>(null);
-  const { mutate: addLink, isPending } = useAddLink();
+  const { mutate: addLink, isPending } = useAddLink({
+    onSuccess: () => {
+      if (initialUrl) finishActivity();
+      router.back();
+    },
+  });
   const { data: groups = [] } = useGroups();
 
   const { initialUrl } = useLocalSearchParams<{ initialUrl?: string }>();
@@ -90,7 +96,10 @@ export default function AddScreen() {
   // idle hugs the minimal content; once a link is entered the sheet grows.
   // "90%" stays as the keyboard-extend ceiling in both states.
   const snapPoints = useMemo(
-    () => (previewState.status === "idle" ? [SNAP_IDLE, SNAP_TALL] : [SNAP_ACTIVE, SNAP_TALL]),
+    () =>
+      previewState.status === "idle"
+        ? [SNAP_IDLE, SNAP_TALL]
+        : [SNAP_ACTIVE, SNAP_TALL],
     [previewState.status]
   );
 
