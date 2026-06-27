@@ -28,6 +28,15 @@ export const getAllLinks = async (
   );
 };
 
+export const getLinkByUrl = async (url: string): Promise<Link | null> => {
+  const result = await db.getFirstAsync<Link>(
+    `SELECT * FROM links WHERE url = ? AND is_archived = 0`,
+    [url]
+  );
+
+  return result ?? null;
+};
+
 export const getLinkCountsByGroup = async (): Promise<
   { group_id: string; count: number }[]
 > => {
