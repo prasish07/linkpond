@@ -4,10 +4,10 @@
 
 ---
 
-## Current phase: Phase 7 — Clipboard auto-detect
+## Current phase: Phase 8 — Reminders
 
-**Learning goal:** `expo-clipboard`, app-foreground lifecycle, non-intrusive UI patterns.
-**Build goal:** Open the app with a URL copied → "Save this?" banner.
+**Learning goal:** `expo-notifications`, local notification scheduling, deep linking from notification tap.
+**Build goal:** Set a reminder on any saved link → notification fires at the chosen time → tapping it opens the link detail screen.
 
 ---
 
@@ -110,8 +110,8 @@
 | 5 | ✅ Done | Search & sort — debounced input, SQLite FTS5 or in-memory |
 | 6a | ✅ Done | Share intent — receive URLs from other apps via Android share sheet |
 | 6b | ✅ Done | Return to source app after share-intent save — config plugin + moveTaskToBack |
-| 7 | Next | Clipboard auto-detect — foreground lifecycle |
-| 8 | | Reminders — local notifications, deep link from notification |
+| 7 | ✅ Done | Clipboard auto-detect — foreground lifecycle |
+| 8 | Next | Reminders — local notifications, deep link from notification |
 | 9 | | Polish — empty states, skeletons, app icon, splash |
 | 10 (v2) | | Spaced resurfacing engine |
 
@@ -156,14 +156,15 @@
 ## Last session
 
 - Date: 2026-06-27
-- Branch: `main` (after merging `feature/phase-6b-return-to-source-app`)
+- Branch: `main` (after merging `feature/phase-7-clipboard-detect`)
 
 Recent PRs merged this session:
-- PR #20 — Phase 6b return to source app + group create sheet + fetchPreview fix (`feature/phase-6b-return-to-source-app`)
+- PR #21 — Phase 7 clipboard auto-detect banner (`feature/phase-7-clipboard-detect`)
+- PR #20 — Phase 6b return to source app + group create sheet + fetchPreview fix
 
 Recent commits:
 ```
+e505ac2 Merge pull request #21 from prasish07/feature/phase-7-clipboard-detect
+73baec9 feat: Phase 7 — clipboard auto-detect banner
 512efa9 Merge pull request #20 from prasish07/feature/phase-6b-return-to-source-app
-b8d261e feat: Phase 6b — return to source app after share-intent save
-bea944a Merge pull request #19 from prasish07/feature/phase-6a-share-intent
 ```
