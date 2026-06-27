@@ -10,7 +10,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useAddLink } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
-import { useRouter } from "expo-router";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
@@ -20,6 +19,7 @@ import { fetchPreview, LinkPreview } from "@/lib/fetchPreview";
 import useDebounce from "@/lib/useDebounce";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const CLOSE_ICON_SIZE = 22;
 const NOTE_INPUT_HEIGHT = 80;
@@ -38,6 +38,9 @@ type PreviewState =
 
 const PREVIEW_THUMB_SIZE = 72;
 const SKELETON_LINE_HEIGHT = 10;
+const SNAP_IDLE = "35%";
+const SNAP_ACTIVE = "60%";
+const SNAP_TALL = "90%";
 
 export default function AddScreen() {
   const router = useRouter();
@@ -45,7 +48,9 @@ export default function AddScreen() {
   const { mutate: addLink, isPending } = useAddLink();
   const { data: groups = [] } = useGroups();
 
-  const [url, setUrl] = useState("");
+  const { initialUrl } = useLocalSearchParams<{ initialUrl?: string }>();
+
+  const [url, setUrl] = useState(initialUrl ?? "");
   const [note, setNote] = useState("");
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
@@ -85,7 +90,7 @@ export default function AddScreen() {
   // idle hugs the minimal content; once a link is entered the sheet grows.
   // "90%" stays as the keyboard-extend ceiling in both states.
   const snapPoints = useMemo(
-    () => (previewState.status === "idle" ? ["30%", "90%"] : ["60%", "90%"]),
+    () => (previewState.status === "idle" ? [SNAP_IDLE, SNAP_TALL] : [SNAP_ACTIVE, SNAP_TALL]),
     [previewState.status]
   );
 

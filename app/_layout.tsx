@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { initDB } from "@/db/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ShareIntentProvider } from "expo-share-intent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,28 +31,30 @@ const RootLayout = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
-          <Stack.Screen
-            name="group/create"
-            options={{
-              presentation: "transparentModal",
-              headerShown: false,
-              animation: "fade",
-            }}
-          />
-          <Stack.Screen
-            name="add"
-            options={{
-              presentation: "transparentModal",
-              headerShown: false,
-              animation: "fade",
-            }}
-          />
-        </Stack>
-      </QueryClientProvider>
+      <ShareIntentProvider>
+        <QueryClientProvider client={queryClient}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
+            <Stack.Screen
+              name="group/create"
+              options={{
+                presentation: "transparentModal",
+                headerShown: false,
+                animation: "fade",
+              }}
+            />
+            <Stack.Screen
+              name="add"
+              options={{
+                presentation: "transparentModal",
+                headerShown: false,
+                animation: "fade",
+              }}
+            />
+          </Stack>
+        </QueryClientProvider>
+      </ShareIntentProvider>
     </GestureHandlerRootView>
   );
 };
