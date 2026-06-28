@@ -4,10 +4,10 @@
 
 ---
 
-## Current phase: Phase 8 — Reminders
+## Current phase: Phase 9 — Polish
 
-**Learning goal:** `expo-notifications`, local notification scheduling, deep linking from notification tap.
-**Build goal:** Set a reminder on any saved link → notification fires at the chosen time → tapping it opens the link detail screen.
+**Learning goal:** Empty states, loading skeletons, app icon, splash screen.
+**Build goal:** App feels complete and shippable — no blank screens, no jarring transitions, proper branding.
 
 ---
 
@@ -111,7 +111,8 @@
 | 6a | ✅ Done | Share intent — receive URLs from other apps via Android share sheet |
 | 6b | ✅ Done | Return to source app after share-intent save — config plugin + moveTaskToBack |
 | 7 | ✅ Done | Clipboard auto-detect — foreground lifecycle |
-| 8 | Next | Reminders — local notifications, deep link from notification |
+| 8 | ✅ Done | Reminders — local notifications, deep link from notification |
+| 9 | Next | Polish — empty states, skeletons, app icon, splash |
 | 9 | | Polish — empty states, skeletons, app icon, splash |
 | 10 (v2) | | Spaced resurfacing engine |
 
@@ -155,16 +156,16 @@
 
 ## Last session
 
-- Date: 2026-06-27
-- Branch: `main` (after merging `feature/phase-7-clipboard-detect`)
+- Date: 2026-06-28
+- Branch: `main` (after merging `feature/phase-8-reminders`)
 
 Recent PRs merged this session:
-- PR #21 — Phase 7 clipboard auto-detect banner (`feature/phase-7-clipboard-detect`)
-- PR #20 — Phase 6b return to source app + group create sheet + fetchPreview fix
+- PR #22 — Phase 8 reminders with local notifications (`feature/phase-8-reminders`)
+- PR #21 — Phase 7 clipboard auto-detect banner
 
 Recent commits:
 ```
-e505ac2 Merge pull request #21 from prasish07/feature/phase-7-clipboard-detect
-73baec9 feat: Phase 7 — clipboard auto-detect banner
-512efa9 Merge pull request #20 from prasish07/feature/phase-6b-return-to-source-app
+b8b8a8b Merge pull request #22 from prasish07/feature/phase-8-reminders
+2ab990a feat: Phase 8 — reminders with local notifications
+de13769 chore: mark Phase 7 done, advance to Phase 8
 ```
