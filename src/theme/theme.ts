@@ -22,6 +22,7 @@ export const Spacing = {
     xxlarge: 28,
   },
   padding: {
+    xs: 4,
     small: 8,
     medium: 12,
     large: 16,
