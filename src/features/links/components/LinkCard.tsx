@@ -90,18 +90,23 @@ export const LinkCard = ({ item, variant }: Props) => {
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
         </Text>
-        {item.groupName && (
-          <View style={styles.groupRow}>
-            <View
-              style={[styles.groupDot, { backgroundColor: item.groupColor }]}
-            />
-            <Text style={styles.groupLabel}>{item.groupName}</Text>
-          </View>
-        )}
         <Text style={styles.source} numberOfLines={1}>
           {item.source}
         </Text>
-        <Text style={styles.meta}>{item.savedAt}</Text>
+        <View style={styles.metaRow}>
+          {item.groupName && (
+            <>
+              <View
+                style={[styles.groupDot, { backgroundColor: item.groupColor }]}
+              />
+              <Text style={[styles.groupLabel]} numberOfLines={1}>
+                {item.groupName}
+              </Text>
+              <Ionicons name="ellipse" size={3} color={Colors.tertiary} />
+            </>
+          )}
+          <Text style={styles.meta}>{item.savedAt}</Text>
+        </View>
       </View>
     </View>
   );
@@ -118,7 +123,7 @@ const styles = StyleSheet.create({
   },
   listThumb: {
     width: 80,
-    height: 72,
+    height: "100%",
     borderRadius: Spacing.radius.small,
     backgroundColor: Colors.input,
     flexShrink: 0,
@@ -145,7 +150,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    gap: Spacing.gap.xs,
   },
   title: {
     fontSize: Typography.fontSize.medium,
@@ -162,8 +168,9 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.small,
     fontFamily: Typography.fontFamily,
     color: Colors.tertiary,
+    flexShrink: 0,
   },
-  groupRow: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.gap.xs,
@@ -171,10 +178,14 @@ const styles = StyleSheet.create({
   groupDot: {
     width: DOT_SIZE,
     height: DOT_SIZE,
-    borderRadius: Spacing.radius.xs,
+    borderRadius: DOT_SIZE / 2,
   },
   groupLabel: {
     fontSize: Typography.fontSize.small,
-    color: Colors.secondary,
+    fontWeight: "600",
+    flexShrink: 1,
+    minWidth: 0,
+    color: Colors.tertiary,
+    textTransform: "capitalize",
   },
 });

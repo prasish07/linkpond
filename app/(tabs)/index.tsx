@@ -1,12 +1,6 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Touchable } from "@/components/Touchable";
+import { LinkListSkeleton } from "@/features/links/components/LinkListSkeleton";
 import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -174,11 +168,7 @@ const HomeScreen = () => {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator
-          color={Colors.gold}
-          size="large"
-          style={{ flex: 1 }}
-        />
+        <LinkListSkeleton />
       ) : links.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons

@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   FlatList,
   ScrollView,
   StyleSheet,
@@ -8,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { Touchable } from "@/components/Touchable";
+import { LinkListSkeleton } from "@/features/links/components/LinkListSkeleton";
 import { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -121,11 +121,7 @@ const SearchScreen = () => {
 
       {/* Results */}
       {isLoading ? (
-        <ActivityIndicator
-          color={Colors.gold}
-          size="large"
-          style={{ flex: 1 }}
-        />
+        <LinkListSkeleton />
       ) : debouncedQuery.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="search-outline" size={40} color={Colors.input} />

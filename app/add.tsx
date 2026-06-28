@@ -1,10 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -40,7 +35,7 @@ type PreviewState =
 const PREVIEW_THUMB_SIZE = 72;
 const SKELETON_LINE_HEIGHT = 10;
 const SNAP_IDLE = "35%";
-const SNAP_ACTIVE = "60%";
+const SNAP_ACTIVE = "70%";
 const SNAP_TALL = "90%";
 
 export default function AddScreen() {

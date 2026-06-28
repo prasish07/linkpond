@@ -1,12 +1,6 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList, Alert } from "react-native";
 import { Touchable } from "@/components/Touchable";
+import { LinkListSkeleton } from "@/features/links/components/LinkListSkeleton";
 import { useCallback, useLayoutEffect } from "react";
 import {
   useLocalSearchParams,
@@ -109,8 +103,8 @@ export default function GroupDetailScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator color={Colors.gold} size="large" />
+      <View style={styles.container}>
+        <LinkListSkeleton />
       </View>
     );
   }
@@ -142,12 +136,6 @@ export default function GroupDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.body },
-  centered: {
-    flex: 1,
-    backgroundColor: Colors.body,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   headerActions: {
     flexDirection: "row",
     gap: Spacing.gap.large,
