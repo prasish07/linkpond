@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
+  FlatList,
   Linking,
   Alert,
 } from "react-native";
@@ -19,6 +20,12 @@ import {
 } from "@/features/links/hooks/useLinksHooks";
 import { getBrandInfo } from "@/lib/getBrandInfo";
 import { timeAgo } from "@/lib/timeAgo";
+import {
+  useDeleteReminder,
+  useReminder,
+  useSetReminder,
+} from "@/features/reminders/hooks/useRemindersHooks";
+import { PRESETS, formatReminderDate } from "@/features/reminders/utils";
 
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -27,6 +34,10 @@ export default function LinkDetailScreen() {
 
   const [descExpanded, setDescExpanded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const { data: reminder } = useReminder(id);
+  const { mutate: setReminder, isPending: isSetting } = useSetReminder(id);
+  const { mutate: removeReminder } = useDeleteReminder(id);
 
   useFocusEffect(
     useCallback(() => {
@@ -144,6 +155,61 @@ export default function LinkDetailScreen() {
         <Ionicons name="open-outline" size={18} color={Colors.body} />
         <Text style={styles.openBtnText}>Open original</Text>
       </TouchableOpacity>
+
+      {/* reminder card if link has a reminder   */}
+      {reminder ? (
+        <View style={styles.reminderCard}>
+          <Ionicons name="alarm-outline" size={16} color={Colors.gold} />
+          <Text style={styles.reminderText}>
+            Reminder: {formatReminderDate(reminder.remind_at)}
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              removeReminder({
+                id: reminder.id,
+                notification_id: reminder.notification_id,
+              })
+            }
+          >
+            <Ionicons
+              name="close-circle-outline"
+              size={18}
+              color={Colors.destructive}
+            />
+          </TouchableOpacity>
+        </View>
+      ) : showPicker ? (
+        <View style={styles.presetList}>
+          <FlatList
+            data={PRESETS.filter((p) => p.offset() > new Date())}
+            keyExtractor={(p) => p.label}
+            scrollEnabled={false}
+            renderItem={({ item: p }) => (
+              <TouchableOpacity
+                style={styles.presetItem}
+                onPress={() => {
+                  setReminder({ title: link.title ?? link.url, date: p.offset() });
+                  setShowPicker(false);
+                }}
+                disabled={isSetting}
+              >
+                <Text style={styles.presetText}>{p.label}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <TouchableOpacity onPress={() => setShowPicker(false)}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.reminderBtn}
+          onPress={() => setShowPicker(true)}
+        >
+          <Ionicons name="alarm-outline" size={18} color={Colors.primary} />
+          <Text style={styles.reminderBtnText}>Set reminder</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }
@@ -241,5 +307,58 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card,
     justifyContent: "center",
     alignItems: "center",
+  },
+  reminderBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.gap.small,
+    borderWidth: 1,
+    borderColor: Colors.input,
+    margin: Spacing.padding.large,
+    marginTop: 0,
+    padding: Spacing.padding.medium,
+    borderRadius: Spacing.radius.medium,
+  },
+  reminderBtnText: {
+    color: Colors.primary,
+    fontWeight: "600",
+    fontSize: Typography.fontSize.medium,
+  },
+  reminderCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    margin: Spacing.padding.large,
+    marginTop: 0,
+    padding: Spacing.padding.medium,
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radius.medium,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+  },
+  reminderText: {
+    flex: 1,
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.small,
+  },
+  presetList: {
+    margin: Spacing.padding.large,
+    marginTop: 0,
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radius.medium,
+    overflow: "hidden",
+  },
+  presetItem: {
+    padding: Spacing.padding.medium,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.input,
+  },
+  presetText: { color: Colors.primary, fontSize: Typography.fontSize.medium },
+  cancelText: {
+    color: Colors.destructive,
+    textAlign: "center",
+    padding: Spacing.padding.medium,
+    fontSize: Typography.fontSize.medium,
   },
 });

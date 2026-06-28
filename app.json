@@ -33,6 +33,13 @@
       "expo-sqlite",
       "expo-image",
       "expo-share-intent",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-foreground.png",
+          "color": "#E8D44D"
+        }
+      ],
       "./plugins/withFinishActivity"
     ],
     "extra": {
