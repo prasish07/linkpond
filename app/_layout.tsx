@@ -1,10 +1,15 @@
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { initDB } from "@/db/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ShareIntentProvider } from "expo-share-intent";
+import {
+  requestNotificationPermission,
+  setupNotificationChannel,
+} from "@/lib/notifications";
+import * as Notifications from "expo-notifications";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +19,29 @@ const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
     HankenGrotesk: require("../assets/fonts/HankenGrotesk-VariableFont_wght.ttf"),
   });
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const setup = async () => {
+      try {
+        await setupNotificationChannel();
+        await requestNotificationPermission();
+      } catch {
+        // notification setup failed — non-critical, app works without it
+      }
+    };
+    setup();
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const linkId = response.notification.request.content.data?.linkId;
+        if (linkId) router.push(`/link/${linkId}`);
+      }
+    );
+
+    return () => subscription.remove();
+  }, [router]);
 
   useEffect(() => {
     if (fontsLoaded || error) {
