@@ -24,7 +24,6 @@ import { timeAgo } from "@/lib/timeAgo";
 import { useClipboardDetect } from "@/lib/useClipboardDetect";
 import { ClipboardBanner } from "@/features/links/components/ClipboardBanner";
 
-const FAB_SIZE = 56;
 const CHIP_HEIGHT = 26;
 
 const HomeScreen = () => {
@@ -232,9 +231,6 @@ const HomeScreen = () => {
           }
         />
       )}
-      <TouchableOpacity style={styles.fab} onPress={() => router.push("/add")}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -314,22 +310,6 @@ const styles = StyleSheet.create({
     color: Colors.body,
     fontWeight: "700",
     fontSize: Typography.fontSize.medium,
-  },
-  fab: {
-    position: "absolute",
-    bottom: Spacing.padding.xlarge,
-    right: Spacing.padding.xlarge,
-    width: FAB_SIZE,
-    height: FAB_SIZE,
-    borderRadius: Spacing.radius.xxlarge,
-    backgroundColor: Colors.gold,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fabText: {
-    fontSize: Typography.fontSize.xxlarge,
-    color: Colors.body,
-    lineHeight: Typography.fontLineHeight.xxlarge,
   },
   filter: {
     flexGrow: 0,

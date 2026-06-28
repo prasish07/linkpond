@@ -89,6 +89,18 @@ export const updateLinkPreview = async (
   );
 };
 
+export const updateLink = async (link: {
+  id: string;
+  title: string;
+  note: string;
+  group_id?: string;
+}): Promise<void> => {
+  await db.runAsync(
+    `UPDATE links SET title = ?, note = ?, group_id = ? WHERE id = ?`,
+    [link.title || null, link.note || null, link.group_id ?? null, link.id]
+  );
+};
+
 export const deleteLink = async (id: string): Promise<void> => {
   await db.runAsync(`DELETE FROM links WHERE id = ?`, [id]);
 };

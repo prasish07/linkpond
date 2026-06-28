@@ -14,7 +14,7 @@ export const getBrandInfo = (url: string): BrandInfo | null => {
       return { icon: "instagram", color: "#E1306C" };
     if (hostname.includes("twitter.com") || hostname.includes("x.com"))
       return { icon: "twitter", color: "#1DA1F2" };
-    if (hostname.includes("youtube.com"))
+    if (hostname.includes("youtube.com") || hostname.includes("youtu.be"))
       return { icon: "youtube-play", color: "#FF0000" };
     if (hostname.includes("linkedin.com"))
       return { icon: "linkedin", color: "#0A66C2" };

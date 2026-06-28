@@ -32,7 +32,10 @@ export default function GroupsScreen() {
         count === 0 ? "No links yet" : `${count} link${count === 1 ? "" : "s"}`;
 
       return (
-        <TouchableOpacity style={styles.groupCard}>
+        <TouchableOpacity
+          style={styles.groupCard}
+          onPress={() => router.push(`/group/${item.id}`)}
+        >
           <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
             <Ionicons name={item.icon as any} size={24} color={Colors.body} />
           </View>
@@ -44,7 +47,7 @@ export default function GroupsScreen() {
         </TouchableOpacity>
       );
     },
-    [counts] // ← important: add counts to deps
+    [counts, router]
   );
 
   return (

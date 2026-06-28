@@ -5,6 +5,7 @@ import {
   getLinkById,
   getLinkCountsByGroup,
   insertLink,
+  updateLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
 import { useRouter } from "expo-router";
@@ -63,6 +64,30 @@ export const useAddLink = (options?: { onSuccess?: () => void }) => {
     onError: (error) => {
       console.error("Failed to add link:", error);
       alert("Failed to add link. Please try again.");
+    },
+  });
+};
+
+export const useUpdateLink = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (fields: {
+      id: string;
+      title: string;
+      note: string;
+      group_id?: string;
+    }) => updateLink(fields),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["link"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
+      router.back();
+    },
+    onError: (error) => {
+      console.error("Failed to update link:", error);
+      alert("Failed to update link. Please try again.");
     },
   });
 };

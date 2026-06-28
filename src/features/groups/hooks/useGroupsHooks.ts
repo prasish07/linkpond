@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllGroups, insertGroup } from "@/features/groups/data/groups.repo";
+import {
+  getAllGroups,
+  insertGroup,
+  updateGroup,
+  deleteGroup,
+} from "@/features/groups/data/groups.repo";
 import { useRouter } from "expo-router";
 
 export const useGroups = () =>
@@ -24,6 +29,48 @@ export const useAddGroup = () => {
     onError: (error) => {
       console.error("Failed to create group:", error);
       alert("Failed to create group. Please try again.");
+    },
+  });
+};
+
+export const useUpdateGroup = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (group: {
+      id: string;
+      name: string;
+      color: string;
+      icon: string;
+    }) => updateGroup(group),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      router.back();
+    },
+    onError: (error) => {
+      console.error("Failed to update group:", error);
+      alert("Failed to update group. Please try again.");
+    },
+  });
+};
+
+export const useDeleteGroup = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteGroup(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
+      router.back();
+    },
+    onError: (error) => {
+      console.error("Failed to delete group:", error);
+      alert("Failed to delete group. Please try again.");
     },
   });
 };
