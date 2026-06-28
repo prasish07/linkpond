@@ -3,9 +3,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Linking,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useCallback, useState } from "react";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -104,14 +104,14 @@ export default function ResurfaceScreen() {
               </Text>
 
               <View style={styles.actions}>
-                <TouchableOpacity
+                <Touchable
                   style={styles.laterBtn}
                   onPress={() => setSkip((s) => s + 1)}
                   disabled={skip + 1 >= oldestFirst.length}
                 >
                   <Text style={styles.laterBtnText}>Later</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Touchable>
+                <Touchable
                   style={styles.openBtn}
                   onPress={() => Linking.openURL(featured.url)}
                   activeOpacity={0.8}
@@ -122,7 +122,7 @@ export default function ResurfaceScreen() {
                     color={Colors.body}
                   />
                   <Text style={styles.openBtnText}>Open now</Text>
-                </TouchableOpacity>
+                </Touchable>
               </View>
             </View>
 
@@ -130,7 +130,7 @@ export default function ResurfaceScreen() {
               <>
                 <Text style={styles.sectionLabel}>COMING UP NEXT</Text>
                 {comingUp.map((item) => (
-                  <TouchableOpacity
+                  <Touchable
                     key={item.id}
                     onPress={() => router.push(`/link/${item.id}`)}
                   >
@@ -152,7 +152,7 @@ export default function ResurfaceScreen() {
                       }}
                       variant="list"
                     />
-                  </TouchableOpacity>
+                  </Touchable>
                 ))}
               </>
             )}

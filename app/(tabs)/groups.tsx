@@ -3,8 +3,8 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -32,7 +32,7 @@ export default function GroupsScreen() {
         count === 0 ? "No links yet" : `${count} link${count === 1 ? "" : "s"}`;
 
       return (
-        <TouchableOpacity
+        <Touchable
           style={styles.groupCard}
           onPress={() => router.push(`/group/${item.id}`)}
         >
@@ -44,7 +44,7 @@ export default function GroupsScreen() {
             <Text style={styles.groupCount}>{countLabel}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={Colors.secondary} />
-        </TouchableOpacity>
+        </Touchable>
       );
     },
     [counts, router]
@@ -61,13 +61,13 @@ export default function GroupsScreen() {
             </Text>
           </View>
           <Text style={styles.empty}>No groups yet.</Text>
-          <TouchableOpacity
+          <Touchable
             style={styles.newGroupBtn}
             onPress={() => router.push("/group/create")}
           >
             <Ionicons name="add" size={18} color={Colors.secondary} />
             <Text style={styles.newGroupText}>New group</Text>
-          </TouchableOpacity>
+          </Touchable>
         </View>
       ) : (
         <FlatList
@@ -84,13 +84,13 @@ export default function GroupsScreen() {
             </View>
           }
           ListFooterComponent={
-            <TouchableOpacity
+            <Touchable
               style={styles.newGroupBtn}
               onPress={() => router.push("/group/create")}
             >
               <Ionicons name="add" size={18} color={Colors.secondary} />
               <Text style={styles.newGroupText}>New group</Text>
-            </TouchableOpacity>
+            </Touchable>
           }
         />
       )}

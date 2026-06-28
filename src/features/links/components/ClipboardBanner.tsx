@@ -1,6 +1,7 @@
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useAddLink } from "../hooks/useLinksHooks";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
@@ -38,16 +39,16 @@ export function ClipboardBanner({ url, onDismiss }: Props) {
       <Text style={styles.domain} numberOfLines={1}>
         {domain}
       </Text>
-      <TouchableOpacity
+      <Touchable
         style={styles.saveBtn}
         onPress={handleSave}
         disabled={isPending}
       >
         <Text style={styles.saveBtnText}>{isPending ? "..." : "Save"}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onDismiss} hitSlop={8}>
+      </Touchable>
+      <Touchable onPress={onDismiss} hitSlop={8}>
         <Ionicons name="close" size={ICON_SIZE} color={Colors.tertiary} />
-      </TouchableOpacity>
+      </Touchable>
     </View>
   );
 }

@@ -5,9 +5,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -41,7 +41,7 @@ const SearchScreen = () => {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <TouchableOpacity onPress={() => router.push(`/link/${item.id}`)}>
+      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
         <LinkCard
           item={{
             id: item.id,
@@ -60,7 +60,7 @@ const SearchScreen = () => {
               : undefined,
           }}
         />
-      </TouchableOpacity>
+      </Touchable>
     ),
     [router, groupsMap]
   );
@@ -85,9 +85,9 @@ const SearchScreen = () => {
           autoCorrect={false}
         />
         {query.length > 0 && (
-          <TouchableOpacity onPress={() => setQuery("")}>
+          <Touchable onPress={() => setQuery("")}>
             <Ionicons name="close-circle" size={18} color={Colors.tertiary} />
-          </TouchableOpacity>
+          </Touchable>
         )}
       </View>
 
@@ -99,7 +99,7 @@ const SearchScreen = () => {
         style={styles.sortRow}
       >
         {SORT_OPTIONS.map((opt) => (
-          <TouchableOpacity
+          <Touchable
             key={opt.value}
             style={[styles.chip, sort === opt.value && styles.chipActive]}
             onPress={() => setSort(opt.value)}
@@ -115,7 +115,7 @@ const SearchScreen = () => {
             >
               {opt.label}
             </Text>
-          </TouchableOpacity>
+          </Touchable>
         ))}
       </ScrollView>
 

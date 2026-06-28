@@ -2,7 +2,8 @@ import { Colors, Spacing, Typography, Shadow } from "@/theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { ShareIntentListener } from "@/lib/ShareIntentListener";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const FAB_SIZE = 56;
@@ -69,7 +70,7 @@ const TabsLayout = () => {
         />
       </Tabs>
 
-      <TouchableOpacity
+      <Touchable
         style={[
           styles.fab,
           { bottom: insets.bottom + TAB_BAR_BASE + Spacing.gap.medium },
@@ -78,7 +79,7 @@ const TabsLayout = () => {
         activeOpacity={0.8}
       >
         <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      </Touchable>
     </View>
   );
 };

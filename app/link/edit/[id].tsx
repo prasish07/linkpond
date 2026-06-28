@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import {
@@ -85,13 +85,13 @@ export default function EditLinkScreen() {
         >
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Edit link</Text>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+            <Touchable onPress={handleClose} style={styles.closeBtn}>
               <Ionicons
                 name="close"
                 size={CLOSE_ICON_SIZE}
                 color={Colors.secondary}
               />
-            </TouchableOpacity>
+            </Touchable>
           </View>
 
           <View style={styles.urlRow}>
@@ -155,7 +155,7 @@ export default function EditLinkScreen() {
                 contentContainerStyle={styles.groupRow}
                 keyboardShouldPersistTaps="handled"
               >
-                <TouchableOpacity
+                <Touchable
                   style={[
                     styles.groupChip,
                     !selectedGroupId && styles.groupChipSelected,
@@ -170,9 +170,9 @@ export default function EditLinkScreen() {
                   >
                     None
                   </Text>
-                </TouchableOpacity>
+                </Touchable>
                 {groups.map((g) => (
-                  <TouchableOpacity
+                  <Touchable
                     key={g.id}
                     style={[
                       styles.groupChip,
@@ -200,17 +200,17 @@ export default function EditLinkScreen() {
                     >
                       {g.name}
                     </Text>
-                  </TouchableOpacity>
+                  </Touchable>
                 ))}
               </ScrollView>
             </>
           )}
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={handleClose}>
+            <Touchable style={styles.cancelBtn} onPress={handleClose}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Touchable>
+            <Touchable
               style={styles.saveBtn}
               onPress={handleSave}
               disabled={isPending}
@@ -218,7 +218,7 @@ export default function EditLinkScreen() {
               <Text style={styles.saveBtnText}>
                 {isPending ? "Saving…" : "Save changes"}
               </Text>
-            </TouchableOpacity>
+            </Touchable>
           </View>
         </BottomSheetScrollView>
       </BottomSheet>

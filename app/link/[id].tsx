@@ -3,12 +3,12 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
   ScrollView,
   FlatList,
   Linking,
   Alert,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import {
   useLocalSearchParams,
   useFocusEffect,
@@ -65,14 +65,14 @@ export default function LinkDetailScreen() {
       headerTintColor: Colors.primary,
       headerRight: () => (
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <Touchable
             onPress={() => {
               if (link?.id) router.push(`/link/edit/${link.id}`);
             }}
           >
             <Ionicons name="pencil-outline" size={20} color={Colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Touchable>
+          <Touchable
             onPress={() =>
               Alert.alert("Delete link?", "This can't be undone.", [
                 { text: "Cancel", style: "cancel" },
@@ -91,7 +91,7 @@ export default function LinkDetailScreen() {
               size={20}
               color={Colors.destructive}
             />
-          </TouchableOpacity>
+          </Touchable>
         </View>
       ),
     });
@@ -193,7 +193,7 @@ export default function LinkDetailScreen() {
 
         <Text style={styles.sectionLabel}>REMINDER</Text>
         {reminder ? (
-          <TouchableOpacity
+          <Touchable
             style={styles.reminderCard}
             activeOpacity={0.7}
             onPress={() =>
@@ -233,7 +233,7 @@ export default function LinkDetailScreen() {
               size={18}
               color={Colors.tertiary}
             />
-          </TouchableOpacity>
+          </Touchable>
         ) : showPicker ? (
           <View style={styles.presetList}>
             <FlatList
@@ -241,7 +241,7 @@ export default function LinkDetailScreen() {
               keyExtractor={(p) => p.label}
               scrollEnabled={false}
               renderItem={({ item: p }) => (
-                <TouchableOpacity
+                <Touchable
                   style={styles.presetItem}
                   onPress={() => {
                     setReminder({
@@ -253,21 +253,21 @@ export default function LinkDetailScreen() {
                   disabled={isSetting}
                 >
                   <Text style={styles.presetText}>{p.label}</Text>
-                </TouchableOpacity>
+                </Touchable>
               )}
             />
-            <TouchableOpacity onPress={() => setShowPicker(false)}>
+            <Touchable onPress={() => setShowPicker(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
+            </Touchable>
           </View>
         ) : (
-          <TouchableOpacity
+          <Touchable
             style={styles.reminderBtn}
             onPress={() => setShowPicker(true)}
           >
             <Ionicons name="alarm-outline" size={18} color={Colors.primary} />
             <Text style={styles.reminderBtnText}>Set reminder</Text>
-          </TouchableOpacity>
+          </Touchable>
         )}
       </ScrollView>
 
@@ -277,14 +277,14 @@ export default function LinkDetailScreen() {
           { paddingBottom: insets.bottom + Spacing.padding.medium },
         ]}
       >
-        <TouchableOpacity
+        <Touchable
           style={styles.openBtn}
           onPress={() => Linking.openURL(link.url)}
           activeOpacity={0.7}
         >
           <Ionicons name="open-outline" size={18} color={Colors.body} />
           <Text style={styles.openBtnText}>Open original</Text>
-        </TouchableOpacity>
+        </Touchable>
       </View>
     </View>
   );

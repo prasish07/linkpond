@@ -4,9 +4,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -51,7 +51,7 @@ const HomeScreen = () => {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <TouchableOpacity onPress={() => router.push(`/link/${item.id}`)}>
+      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
         <LinkCard
           item={{
             id: item.id,
@@ -71,7 +71,7 @@ const HomeScreen = () => {
           }}
           variant={viewMode}
         />
-      </TouchableOpacity>
+      </Touchable>
     ),
     [router, viewMode, groupsMap]
   );
@@ -94,7 +94,7 @@ const HomeScreen = () => {
               Link<Text style={styles.headerTitleAccent}>pond</Text>
             </Text>
           </View>
-          <TouchableOpacity
+          <Touchable
             onPress={() => setViewMode((v) => (v === "list" ? "card" : "list"))}
           >
             <Ionicons
@@ -102,7 +102,7 @@ const HomeScreen = () => {
               size={22}
               color={Colors.primary}
             />
-          </TouchableOpacity>
+          </Touchable>
         </View>
         {groups.length > 0 && (
           <ScrollView
@@ -111,7 +111,7 @@ const HomeScreen = () => {
             contentContainerStyle={styles.filterContent}
             style={styles.filter}
           >
-            <TouchableOpacity
+            <Touchable
               style={[styles.chip, !selectedGroupId && styles.chipActive]}
               onPress={() => setSelectedGroupId(undefined)}
             >
@@ -131,9 +131,9 @@ const HomeScreen = () => {
               >
                 {allLinks.length}
               </Text>
-            </TouchableOpacity>
+            </Touchable>
             {groups.map((g: Group) => (
-              <TouchableOpacity
+              <Touchable
                 key={g.id}
                 style={[
                   styles.chip,
@@ -167,7 +167,7 @@ const HomeScreen = () => {
                 >
                   {groupCounts[g.id] ?? 0}
                 </Text>
-              </TouchableOpacity>
+              </Touchable>
             ))}
           </ScrollView>
         )}
@@ -190,12 +190,12 @@ const HomeScreen = () => {
           <Text style={styles.emptySubtitle}>
             Tap the button below to save your first link
           </Text>
-          <TouchableOpacity
+          <Touchable
             style={styles.emptyCta}
             onPress={() => router.push("/add")}
           >
             <Text style={styles.emptyCtaText}>+ Save a link</Text>
-          </TouchableOpacity>
+          </Touchable>
         </View>
       ) : (
         <FlatList
@@ -208,7 +208,7 @@ const HomeScreen = () => {
             <View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>{links.length} links</Text>
-                <TouchableOpacity
+                <Touchable
                   style={styles.sortButton}
                   onPress={() =>
                     setSort((s) => (s === "recent" ? "oldest" : "recent"))
@@ -222,7 +222,7 @@ const HomeScreen = () => {
                     size={14}
                     color={Colors.secondary}
                   />
-                </TouchableOpacity>
+                </Touchable>
               </View>
               {clipboardUrl && (
                 <ClipboardBanner url={clipboardUrl} onDismiss={dismiss} />

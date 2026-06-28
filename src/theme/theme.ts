@@ -11,6 +11,7 @@ export const Colors = {
   confirm: "#9DBE8E",
   scrim: "rgba(0,0,0,0.5)",
   shadow: "#000000",
+  ripple: "rgba(255,255,255,0.12)",
 };
 
 export const Shadow = {

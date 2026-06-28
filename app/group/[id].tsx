@@ -3,10 +3,10 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { useCallback, useLayoutEffect } from "react";
 import {
   useLocalSearchParams,
@@ -50,12 +50,12 @@ export default function GroupDetailScreen() {
       headerTintColor: Colors.primary,
       headerRight: () => (
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <Touchable
             onPress={() => router.push(`/group/create?id=${id}`)}
           >
             <Ionicons name="pencil-outline" size={20} color={Colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Touchable>
+          <Touchable
             onPress={() =>
               Alert.alert(
                 "Delete group?",
@@ -78,7 +78,7 @@ export default function GroupDetailScreen() {
               size={20}
               color={Colors.destructive}
             />
-          </TouchableOpacity>
+          </Touchable>
         </View>
       ),
     });
@@ -86,7 +86,7 @@ export default function GroupDetailScreen() {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <TouchableOpacity onPress={() => router.push(`/link/${item.id}`)}>
+      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
         <LinkCard
           item={{
             id: item.id,
@@ -102,7 +102,7 @@ export default function GroupDetailScreen() {
           }}
           variant="list"
         />
-      </TouchableOpacity>
+      </Touchable>
     ),
     [router, group]
   );

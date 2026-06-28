@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography, GroupColors } from "@/theme/theme";
 import {
@@ -115,7 +116,7 @@ const CreateGroupScreen = () => {
             <Text style={styles.headerTitle}>
               {isEdit ? "Edit group" : "New group"}
             </Text>
-            <TouchableOpacity
+            <Touchable
               onPress={() => sheetRef.current?.close()}
               style={styles.closeBtn}
             >
@@ -124,7 +125,7 @@ const CreateGroupScreen = () => {
                 size={CLOSE_ICON_SIZE}
                 color={Colors.secondary}
               />
-            </TouchableOpacity>
+            </Touchable>
           </View>
 
           <View style={styles.sectionLabelRow}>
@@ -154,7 +155,7 @@ const CreateGroupScreen = () => {
           </View>
           <View style={styles.swatches}>
             {GroupColors.map((c) => (
-              <TouchableOpacity
+              <Touchable
                 key={c}
                 style={[
                   styles.swatch,
@@ -176,7 +177,7 @@ const CreateGroupScreen = () => {
           </View>
           <View style={styles.iconGrid}>
             {ICONS.map((item) => (
-              <TouchableOpacity
+              <Touchable
                 key={item}
                 style={[
                   styles.iconBtn,
@@ -189,18 +190,18 @@ const CreateGroupScreen = () => {
                   size={24}
                   color={icon === item ? Colors.body : Colors.secondary}
                 />
-              </TouchableOpacity>
+              </Touchable>
             ))}
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity
+            <Touchable
               style={styles.cancelBtn}
               onPress={() => sheetRef.current?.close()}
             >
               <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Touchable>
+            <Touchable
               style={[styles.saveBtn, { backgroundColor: color }]}
               onPress={handleSave}
               disabled={isPending}
@@ -212,7 +213,7 @@ const CreateGroupScreen = () => {
                     ? "Save changes"
                     : "Create group"}
               </Text>
-            </TouchableOpacity>
+            </Touchable>
           </View>
         </BottomSheetScrollView>
       </BottomSheet>
