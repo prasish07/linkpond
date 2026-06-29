@@ -5,6 +5,7 @@ import {
   getLinkById,
   getLinkCountsByGroup,
   insertLink,
+  markLinkOpened,
   updateLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
@@ -88,6 +89,18 @@ export const useUpdateLink = () => {
     onError: (error) => {
       console.error("Failed to update link:", error);
       alert("Failed to update link. Please try again.");
+    },
+  });
+};
+
+export const useMarkOpened = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => markLinkOpened(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["link"] });
     },
   });
 };

@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Colors, Spacing, Typography } from "@/theme/theme";
-import { useLinks } from "@/features/links/hooks/useLinksHooks";
+import { useLinks, useMarkOpened } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { timeAgo } from "@/lib/timeAgo";
@@ -24,9 +24,10 @@ export default function ResurfaceScreen() {
   const router = useRouter();
   const { data: links = [], refetch } = useLinks();
   const { data: groups = [] } = useGroups();
+  const { mutate: markOpened } = useMarkOpened();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
-  // preview stand-in: oldest saves first (the real engine lands in v2)
+  // surface the oldest still-unopened saves (the real engine lands in v2)
   const [skip, setSkip] = useState(0);
 
   useFocusEffect(
@@ -35,9 +36,11 @@ export default function ResurfaceScreen() {
     }, [refetch])
   );
 
-  const oldestFirst = [...links].sort((a, b) => a.created_at - b.created_at);
-  const featured = oldestFirst[skip];
-  const comingUp = oldestFirst.slice(skip + 1, skip + 4);
+  const unopened = links
+    .filter((l) => !l.opened_at)
+    .sort((a, b) => a.created_at - b.created_at);
+  const featured = unopened[skip];
+  const comingUp = unopened.slice(skip + 1, skip + 4);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -107,13 +110,16 @@ export default function ResurfaceScreen() {
                 <Touchable
                   style={styles.laterBtn}
                   onPress={() => setSkip((s) => s + 1)}
-                  disabled={skip + 1 >= oldestFirst.length}
+                  disabled={skip + 1 >= unopened.length}
                 >
                   <Text style={styles.laterBtnText}>Later</Text>
                 </Touchable>
                 <Touchable
                   style={styles.openBtn}
-                  onPress={() => Linking.openURL(featured.url)}
+                  onPress={() => {
+                    markOpened(featured.id);
+                    Linking.openURL(featured.url);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Ionicons

@@ -23,6 +23,7 @@ import { useCallback, useState, useLayoutEffect } from "react";
 import {
   useDeleteLink,
   useLinkById,
+  useMarkOpened,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { getBrandInfo } from "@/lib/getBrandInfo";
@@ -38,6 +39,7 @@ export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: link, isLoading, refetch } = useLinkById(id);
   const { mutate: deleteLink } = useDeleteLink();
+  const { mutate: markOpened } = useMarkOpened();
   const { data: groups = [] } = useGroups();
   const navigation = useNavigation();
   const router = useRouter();
@@ -279,7 +281,10 @@ export default function LinkDetailScreen() {
       >
         <Touchable
           style={styles.openBtn}
-          onPress={() => Linking.openURL(link.url)}
+          onPress={() => {
+            markOpened(link.id);
+            Linking.openURL(link.url);
+          }}
           activeOpacity={0.7}
         >
           <Ionicons name="open-outline" size={18} color={Colors.body} />

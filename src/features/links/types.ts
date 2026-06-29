@@ -11,4 +11,5 @@ export type Link = {
   is_archived: number;
   created_at: number;
   updated_at: number;
+  opened_at?: number | null;
 };

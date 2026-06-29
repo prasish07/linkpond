@@ -101,6 +101,14 @@ export const updateLink = async (link: {
   );
 };
 
+export const markLinkOpened = async (id: string): Promise<void> => {
+  // only stamp the first open so we keep the original "opened" moment
+  await db.runAsync(
+    `UPDATE links SET opened_at = strftime('%s', 'now') WHERE id = ? AND opened_at IS NULL`,
+    [id]
+  );
+};
+
 export const deleteLink = async (id: string): Promise<void> => {
   await db.runAsync(`DELETE FROM links WHERE id = ?`, [id]);
 };
