@@ -55,6 +55,11 @@ export const initDB = async (): Promise<void> => {
             FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS recent_searches (
+            term TEXT PRIMARY KEY,
+            searched_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        );
+
         CREATE INDEX IF NOT EXISTS idx_links_group ON links(group_id);
         CREATE INDEX IF NOT EXISTS idx_links_created ON links(created_at);
         CREATE INDEX IF NOT EXISTS idx_reminders_at ON reminders(remind_at);
