@@ -11,6 +11,7 @@ import {
 } from "@/features/links/data/links.repo";
 import { useRouter } from "expo-router";
 import { fetchPreview } from "@/lib/fetchPreview";
+import { useToast } from "@/components/Toast";
 
 type AddLinkFields = {
   url: string;
@@ -44,6 +45,7 @@ export const useLinkById = (id: string) =>
 export const useAddLink = (options?: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: async (fields: AddLinkFields) => {
@@ -61,6 +63,7 @@ export const useAddLink = (options?: { onSuccess?: () => void }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
       options?.onSuccess ? options.onSuccess() : router.back();
+      toast("Link saved");
     },
     onError: (error) => {
       console.error("Failed to add link:", error);
@@ -72,6 +75,7 @@ export const useAddLink = (options?: { onSuccess?: () => void }) => {
 export const useUpdateLink = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (fields: {
@@ -85,6 +89,7 @@ export const useUpdateLink = () => {
       queryClient.invalidateQueries({ queryKey: ["link"] });
       queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
       router.back();
+      toast("Link updated");
     },
     onError: (error) => {
       console.error("Failed to update link:", error);
@@ -108,12 +113,14 @@ export const useMarkOpened = () => {
 export const useDeleteLink = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (id: string) => deleteLink(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
       router.back();
+      toast("Link deleted");
     },
   });
 };

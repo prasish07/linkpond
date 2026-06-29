@@ -103,11 +103,7 @@ export const LinkCard = ({ item, variant }: Props) => {
             {metaLine}
             {item.reminder && (
               <View style={styles.reminderTag}>
-                <Ionicons
-                  name="notifications"
-                  size={12}
-                  color={Colors.gold}
-                />
+                <Ionicons name="notifications" size={12} color={Colors.gold} />
                 <Text style={styles.reminderText} numberOfLines={1}>
                   {item.reminder}
                 </Text>
@@ -181,7 +177,7 @@ const styles = StyleSheet.create({
   },
   listThumb: {
     width: 80,
-    height: 72,
+    height: "100%",
     borderRadius: Spacing.radius.small,
     backgroundColor: Colors.input,
   },

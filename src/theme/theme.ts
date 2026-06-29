@@ -12,6 +12,7 @@ export const Colors = {
   scrim: "rgba(0,0,0,0.5)",
   shadow: "#000000",
   ripple: "rgba(255,255,255,0.12)",
+  toastBg: "#3A4435",
 };
 
 export const Shadow = {
