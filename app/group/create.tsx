@@ -1,13 +1,18 @@
-import { useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography, GroupColors } from "@/theme/theme";
-import { useAddGroup } from "@/features/groups/hooks/useGroupsHooks";
+import {
+  useAddGroup,
+  useUpdateGroup,
+  useGroups,
+} from "@/features/groups/hooks/useGroupsHooks";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const ICONS: (keyof typeof Ionicons.glyphMap)[] = [
   "bookmark",
@@ -52,18 +57,41 @@ const SNAP_POINTS = ["82%"];
 const CreateGroupScreen = () => {
   const router = useRouter();
   const sheetRef = useRef<BottomSheet>(null);
-  const { mutate: addGroup, isPending } = useAddGroup();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEdit = !!id;
+
+  const { mutate: addGroup, isPending: isAdding } = useAddGroup();
+  const { mutate: updateGroup, isPending: isUpdating } = useUpdateGroup();
+  const { data: groups = [] } = useGroups();
+  const existing = groups.find((g) => g.id === id);
 
   const [name, setName] = useState("");
   const [color, setColor] = useState(GroupColors[0]);
   const [icon, setIcon] = useState<keyof typeof Ionicons.glyphMap>("folder");
+
+  // prefill once when editing, after the group is found in the cache
+  const didPrefill = useRef(false);
+  useEffect(() => {
+    if (isEdit && existing && !didPrefill.current) {
+      setName(existing.name);
+      setColor(existing.color);
+      setIcon(existing.icon as keyof typeof Ionicons.glyphMap);
+      didPrefill.current = true;
+    }
+  }, [isEdit, existing]);
+
+  const isPending = isAdding || isUpdating;
 
   const handleSave = () => {
     if (!name.trim()) {
       alert("Name is required.");
       return;
     }
-    addGroup({ name: name.trim(), color, icon: icon as string });
+    if (isEdit && id) {
+      updateGroup({ id, name: name.trim(), color, icon: icon as string });
+    } else {
+      addGroup({ name: name.trim(), color, icon: icon as string });
+    }
   };
 
   return (
@@ -85,8 +113,10 @@ const CreateGroupScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>New group</Text>
-            <TouchableOpacity
+            <Text style={styles.headerTitle}>
+              {isEdit ? "Edit group" : "New group"}
+            </Text>
+            <Touchable
               onPress={() => sheetRef.current?.close()}
               style={styles.closeBtn}
             >
@@ -95,7 +125,7 @@ const CreateGroupScreen = () => {
                 size={CLOSE_ICON_SIZE}
                 color={Colors.secondary}
               />
-            </TouchableOpacity>
+            </Touchable>
           </View>
 
           <View style={styles.sectionLabelRow}>
@@ -125,7 +155,7 @@ const CreateGroupScreen = () => {
           </View>
           <View style={styles.swatches}>
             {GroupColors.map((c) => (
-              <TouchableOpacity
+              <Touchable
                 key={c}
                 style={[
                   styles.swatch,
@@ -147,7 +177,7 @@ const CreateGroupScreen = () => {
           </View>
           <View style={styles.iconGrid}>
             {ICONS.map((item) => (
-              <TouchableOpacity
+              <Touchable
                 key={item}
                 style={[
                   styles.iconBtn,
@@ -160,26 +190,30 @@ const CreateGroupScreen = () => {
                   size={24}
                   color={icon === item ? Colors.body : Colors.secondary}
                 />
-              </TouchableOpacity>
+              </Touchable>
             ))}
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity
+            <Touchable
               style={styles.cancelBtn}
               onPress={() => sheetRef.current?.close()}
             >
               <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Touchable>
+            <Touchable
               style={[styles.saveBtn, { backgroundColor: color }]}
               onPress={handleSave}
               disabled={isPending}
             >
               <Text style={styles.saveBtnText}>
-                {isPending ? "Saving…" : "Create group"}
+                {isPending
+                  ? "Saving…"
+                  : isEdit
+                    ? "Save changes"
+                    : "Create group"}
               </Text>
-            </TouchableOpacity>
+            </Touchable>
           </View>
         </BottomSheetScrollView>
       </BottomSheet>

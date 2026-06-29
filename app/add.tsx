@@ -1,11 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useAddLink } from "@/features/links/hooks/useLinksHooks";
@@ -40,7 +35,7 @@ type PreviewState =
 const PREVIEW_THUMB_SIZE = 72;
 const SKELETON_LINE_HEIGHT = 10;
 const SNAP_IDLE = "35%";
-const SNAP_ACTIVE = "60%";
+const SNAP_ACTIVE = "70%";
 const SNAP_TALL = "90%";
 
 export default function AddScreen() {
@@ -156,13 +151,13 @@ export default function AddScreen() {
               </View>
               <Text style={styles.headerTitle}>Add a link</Text>
             </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+            <Touchable onPress={handleClose} style={styles.closeBtn}>
               <Ionicons
                 name="close"
                 size={CLOSE_ICON_SIZE}
                 color={Colors.secondary}
               />
-            </TouchableOpacity>
+            </Touchable>
           </View>
 
           <View style={styles.urlRow}>
@@ -184,18 +179,18 @@ export default function AddScreen() {
           {previewState.status === "idle" && (
             <View style={styles.tryRow}>
               <Text style={styles.tryLabel}>Try:</Text>
-              <TouchableOpacity
+              <Touchable
                 style={styles.tryChip}
                 onPress={() => setUrl("https://youtube.com/")}
               >
                 <Text style={styles.tryChipText}>YouTube link</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Touchable>
+              <Touchable
                 style={styles.tryChip}
                 onPress={() => setUrl("https://instagram.com/")}
               >
                 <Text style={styles.tryChipText}>Instagram link</Text>
-              </TouchableOpacity>
+              </Touchable>
             </View>
           )}
           {previewState.status === "loading" && (
@@ -297,7 +292,7 @@ export default function AddScreen() {
                     contentContainerStyle={styles.groupRow}
                     keyboardShouldPersistTaps="handled"
                   >
-                    <TouchableOpacity
+                    <Touchable
                       style={[
                         styles.groupChip,
                         !selectedGroupId && styles.groupChipSelected,
@@ -312,9 +307,9 @@ export default function AddScreen() {
                       >
                         None
                       </Text>
-                    </TouchableOpacity>
+                    </Touchable>
                     {groups.map((g) => (
-                      <TouchableOpacity
+                      <Touchable
                         key={g.id}
                         style={[
                           styles.groupChip,
@@ -344,7 +339,7 @@ export default function AddScreen() {
                         >
                           {g.name}
                         </Text>
-                      </TouchableOpacity>
+                      </Touchable>
                     ))}
                   </ScrollView>
                 </>
@@ -353,10 +348,10 @@ export default function AddScreen() {
           )}
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={handleClose}>
+            <Touchable style={styles.cancelBtn} onPress={handleClose}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Touchable>
+            <Touchable
               style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
               onPress={handleAdd}
               disabled={!canSave || isPending}
@@ -373,7 +368,7 @@ export default function AddScreen() {
                   Save link
                 </Text>
               )}
-            </TouchableOpacity>
+            </Touchable>
           </View>
         </BottomSheetScrollView>
       </BottomSheet>

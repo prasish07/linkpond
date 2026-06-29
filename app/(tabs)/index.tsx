@@ -1,12 +1,6 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Touchable } from "@/components/Touchable";
+import { LinkListSkeleton } from "@/features/links/components/LinkListSkeleton";
 import { useCallback, useState } from "react";
 import { Link } from "@/features/links/types";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -24,7 +18,6 @@ import { timeAgo } from "@/lib/timeAgo";
 import { useClipboardDetect } from "@/lib/useClipboardDetect";
 import { ClipboardBanner } from "@/features/links/components/ClipboardBanner";
 
-const FAB_SIZE = 56;
 const CHIP_HEIGHT = 26;
 
 const HomeScreen = () => {
@@ -52,7 +45,7 @@ const HomeScreen = () => {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <TouchableOpacity onPress={() => router.push(`/link/${item.id}`)}>
+      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
         <LinkCard
           item={{
             id: item.id,
@@ -72,7 +65,7 @@ const HomeScreen = () => {
           }}
           variant={viewMode}
         />
-      </TouchableOpacity>
+      </Touchable>
     ),
     [router, viewMode, groupsMap]
   );
@@ -95,7 +88,7 @@ const HomeScreen = () => {
               Link<Text style={styles.headerTitleAccent}>pond</Text>
             </Text>
           </View>
-          <TouchableOpacity
+          <Touchable
             onPress={() => setViewMode((v) => (v === "list" ? "card" : "list"))}
           >
             <Ionicons
@@ -103,7 +96,7 @@ const HomeScreen = () => {
               size={22}
               color={Colors.primary}
             />
-          </TouchableOpacity>
+          </Touchable>
         </View>
         {groups.length > 0 && (
           <ScrollView
@@ -112,7 +105,7 @@ const HomeScreen = () => {
             contentContainerStyle={styles.filterContent}
             style={styles.filter}
           >
-            <TouchableOpacity
+            <Touchable
               style={[styles.chip, !selectedGroupId && styles.chipActive]}
               onPress={() => setSelectedGroupId(undefined)}
             >
@@ -132,9 +125,9 @@ const HomeScreen = () => {
               >
                 {allLinks.length}
               </Text>
-            </TouchableOpacity>
+            </Touchable>
             {groups.map((g: Group) => (
-              <TouchableOpacity
+              <Touchable
                 key={g.id}
                 style={[
                   styles.chip,
@@ -168,18 +161,14 @@ const HomeScreen = () => {
                 >
                   {groupCounts[g.id] ?? 0}
                 </Text>
-              </TouchableOpacity>
+              </Touchable>
             ))}
           </ScrollView>
         )}
       </View>
 
       {isLoading ? (
-        <ActivityIndicator
-          color={Colors.gold}
-          size="large"
-          style={{ flex: 1 }}
-        />
+        <LinkListSkeleton />
       ) : links.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons
@@ -191,12 +180,12 @@ const HomeScreen = () => {
           <Text style={styles.emptySubtitle}>
             Tap the button below to save your first link
           </Text>
-          <TouchableOpacity
+          <Touchable
             style={styles.emptyCta}
             onPress={() => router.push("/add")}
           >
             <Text style={styles.emptyCtaText}>+ Save a link</Text>
-          </TouchableOpacity>
+          </Touchable>
         </View>
       ) : (
         <FlatList
@@ -209,7 +198,7 @@ const HomeScreen = () => {
             <View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>{links.length} links</Text>
-                <TouchableOpacity
+                <Touchable
                   style={styles.sortButton}
                   onPress={() =>
                     setSort((s) => (s === "recent" ? "oldest" : "recent"))
@@ -223,7 +212,7 @@ const HomeScreen = () => {
                     size={14}
                     color={Colors.secondary}
                   />
-                </TouchableOpacity>
+                </Touchable>
               </View>
               {clipboardUrl && (
                 <ClipboardBanner url={clipboardUrl} onDismiss={dismiss} />
@@ -232,9 +221,6 @@ const HomeScreen = () => {
           }
         />
       )}
-      <TouchableOpacity style={styles.fab} onPress={() => router.push("/add")}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -314,22 +300,6 @@ const styles = StyleSheet.create({
     color: Colors.body,
     fontWeight: "700",
     fontSize: Typography.fontSize.medium,
-  },
-  fab: {
-    position: "absolute",
-    bottom: Spacing.padding.xlarge,
-    right: Spacing.padding.xlarge,
-    width: FAB_SIZE,
-    height: FAB_SIZE,
-    borderRadius: Spacing.radius.xxlarge,
-    backgroundColor: Colors.gold,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fabText: {
-    fontSize: Typography.fontSize.xxlarge,
-    color: Colors.body,
-    lineHeight: Typography.fontLineHeight.xxlarge,
   },
   filter: {
     flexGrow: 0,

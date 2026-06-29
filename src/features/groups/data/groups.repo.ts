@@ -14,6 +14,15 @@ export const insertGroup = async (
   );
 };
 
+export const updateGroup = async (
+  group: Pick<Group, "id" | "name" | "color" | "icon">
+): Promise<void> => {
+  await db.runAsync(
+    `UPDATE groups SET name = ?, color = ?, icon = ? WHERE id = ?`,
+    [group.name, group.color, group.icon, group.id]
+  );
+};
+
 export const deleteGroup = async (id: string): Promise<void> => {
   await db.runAsync("DELETE FROM groups WHERE id = ?", [id]);
 };

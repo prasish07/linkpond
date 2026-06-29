@@ -10,6 +10,18 @@ export const Colors = {
   tertiary: "#746F65",
   confirm: "#9DBE8E",
   scrim: "rgba(0,0,0,0.5)",
+  shadow: "#000000",
+  ripple: "rgba(255,255,255,0.12)",
+};
+
+export const Shadow = {
+  fab: {
+    elevation: 6,
+    shadowColor: Colors.shadow,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
 };
 
 export const Spacing = {

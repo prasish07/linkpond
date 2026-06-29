@@ -65,6 +65,14 @@ const RootLayout = () => {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
             <Stack.Screen
+              name="link/edit/[id]"
+              options={{
+                presentation: "transparentModal",
+                headerShown: false,
+                animation: "fade",
+              }}
+            />
+            <Stack.Screen
               name="group/create"
               options={{
                 presentation: "transparentModal",
