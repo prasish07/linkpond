@@ -17,6 +17,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { timeAgo } from "@/lib/timeAgo";
 import { useClipboardDetect } from "@/lib/useClipboardDetect";
 import { ClipboardBanner } from "@/features/links/components/ClipboardBanner";
+import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
+import { formatReminderShort } from "@/features/reminders/utils";
 
 const CHIP_HEIGHT = 26;
 
@@ -33,6 +35,7 @@ const HomeScreen = () => {
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
   const router = useRouter();
   const { data: groupCounts = {} } = useGroupLinkCounts();
+  const { data: reminders = {} } = useActiveReminders();
   const { clipboardUrl, dismiss } = useClipboardDetect();
 
   useFocusEffect(
@@ -56,6 +59,9 @@ const HomeScreen = () => {
             preview: item.thumbnail_url ? "rich" : "fallback",
             thumb: item.thumbnail_url ?? undefined,
             note: item.note ?? undefined,
+            reminder: reminders[item.id]
+              ? formatReminderShort(reminders[item.id])
+              : undefined,
             groupName: item.group_id
               ? groupsMap[item.group_id]?.name
               : undefined,
@@ -67,7 +73,7 @@ const HomeScreen = () => {
         />
       </Touchable>
     ),
-    [router, viewMode, groupsMap]
+    [router, viewMode, groupsMap, reminders]
   );
 
   return (

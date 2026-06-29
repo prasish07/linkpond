@@ -19,6 +19,8 @@ import { useRouter } from "expo-router";
 import useDebounce from "@/lib/useDebounce";
 import { timeAgo } from "@/lib/timeAgo";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
+import { formatReminderShort } from "@/features/reminders/utils";
 
 type SortOption = "recent" | "oldest";
 
@@ -35,6 +37,7 @@ const SearchScreen = () => {
 
   const { data: links = [], isLoading } = useLinks(undefined, debouncedQuery);
   const { data: groups = [] } = useGroups();
+  const { data: reminders = {} } = useActiveReminders();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
   const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
@@ -52,6 +55,9 @@ const SearchScreen = () => {
             preview: item.thumbnail_url ? "rich" : "fallback",
             thumb: item.thumbnail_url ?? undefined,
             note: item.note ?? undefined,
+            reminder: reminders[item.id]
+              ? formatReminderShort(reminders[item.id])
+              : undefined,
             groupName: item.group_id
               ? groupsMap[item.group_id]?.name
               : undefined,
@@ -62,7 +68,7 @@ const SearchScreen = () => {
         />
       </Touchable>
     ),
-    [router, groupsMap]
+    [router, groupsMap, reminders]
   );
 
   return (

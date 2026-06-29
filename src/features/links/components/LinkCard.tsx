@@ -27,6 +27,7 @@ type Props = {
 };
 
 const DOT_SIZE = 7;
+const FAVICON_BADGE = 18;
 
 export const LinkCard = ({ item, variant }: Props) => {
   const [imgError, setImgError] = useState(false);
@@ -42,23 +43,48 @@ export const LinkCard = ({ item, variant }: Props) => {
     );
   };
 
+  // shared meta line: ● group · time
+  const metaLine = (
+    <View style={styles.metaRow}>
+      {item.groupName && (
+        <>
+          <View
+            style={[styles.groupDot, { backgroundColor: item.groupColor }]}
+          />
+          <Text style={styles.groupLabel} numberOfLines={1}>
+            {item.groupName}
+          </Text>
+          <Ionicons name="ellipse" size={3} color={Colors.tertiary} />
+        </>
+      )}
+      <Text style={styles.meta}>{item.savedAt}</Text>
+    </View>
+  );
+
   if (variant === "card") {
     return (
       <View style={styles.cardContainer}>
-        {/* full-width thumbnail */}
-        {!showFallback ? (
-          <Image
-            source={{ uri: item.thumb }}
-            style={styles.cardThumb}
-            contentFit="cover"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <View style={[styles.cardThumb, styles.thumbFallback]}>
-            {getFallbackIcon(item.domain, 48)}
-          </View>
-        )}
-        {/* content */}
+        <View style={styles.cardThumbWrap}>
+          {!showFallback ? (
+            <Image
+              source={{ uri: item.thumb }}
+              style={styles.cardThumb}
+              contentFit="cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <View style={[styles.cardThumb, styles.thumbFallback]}>
+              {getFallbackIcon(item.domain, 48)}
+            </View>
+          )}
+          <View style={styles.badge}>{getFallbackIcon(item.domain, 12)}</View>
+          {item.duration && (
+            <View style={styles.durationBadge}>
+              <Text style={styles.durationText}>{item.duration}</Text>
+            </View>
+          )}
+        </View>
+
         <View style={styles.cardContent}>
           <Text style={styles.title} numberOfLines={2}>
             {item.title}
@@ -66,7 +92,28 @@ export const LinkCard = ({ item, variant }: Props) => {
           <Text style={styles.source} numberOfLines={1}>
             {item.source}
           </Text>
-          <Text style={styles.meta}>{item.savedAt}</Text>
+          {item.note && (
+            <View style={styles.noteRow}>
+              <Text style={styles.noteText} numberOfLines={2}>
+                {item.note}
+              </Text>
+            </View>
+          )}
+          <View style={styles.cardMetaRow}>
+            {metaLine}
+            {item.reminder && (
+              <View style={styles.reminderTag}>
+                <Ionicons
+                  name="notifications"
+                  size={12}
+                  color={Colors.gold}
+                />
+                <Text style={styles.reminderText} numberOfLines={1}>
+                  {item.reminder}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
     );
@@ -74,18 +121,26 @@ export const LinkCard = ({ item, variant }: Props) => {
 
   return (
     <View style={styles.listContainer}>
-      {!showFallback ? (
-        <Image
-          source={{ uri: item.thumb }}
-          style={styles.listThumb}
-          contentFit="cover"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <View style={[styles.listThumb, styles.thumbFallback]}>
-          {getFallbackIcon(item.domain, 32)}
-        </View>
-      )}
+      <View style={styles.listThumbWrap}>
+        {!showFallback ? (
+          <Image
+            source={{ uri: item.thumb }}
+            style={styles.listThumb}
+            contentFit="cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <View style={[styles.listThumb, styles.thumbFallback]}>
+            {getFallbackIcon(item.domain, 32)}
+          </View>
+        )}
+        {item.duration && (
+          <View style={styles.durationBadge}>
+            <Text style={styles.durationText}>{item.duration}</Text>
+          </View>
+        )}
+      </View>
+
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
@@ -93,21 +148,17 @@ export const LinkCard = ({ item, variant }: Props) => {
         <Text style={styles.source} numberOfLines={1}>
           {item.source}
         </Text>
-        <View style={styles.metaRow}>
-          {item.groupName && (
-            <>
-              <View
-                style={[styles.groupDot, { backgroundColor: item.groupColor }]}
-              />
-              <Text style={[styles.groupLabel]} numberOfLines={1}>
-                {item.groupName}
-              </Text>
-              <Ionicons name="ellipse" size={3} color={Colors.tertiary} />
-            </>
-          )}
-          <Text style={styles.meta}>{item.savedAt}</Text>
-        </View>
+        {metaLine}
       </View>
+
+      {item.reminder && (
+        <Ionicons
+          name="notifications-outline"
+          size={16}
+          color={Colors.gold}
+          style={styles.listReminder}
+        />
+      )}
     </View>
   );
 };
@@ -120,19 +171,31 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.radius.medium,
     padding: Spacing.padding.medium,
     gap: Spacing.gap.medium,
+    alignItems: "center",
+  },
+  listThumbWrap: {
+    width: 80,
+    height: 72,
+    flexShrink: 0,
+    position: "relative",
   },
   listThumb: {
     width: 80,
-    height: "100%",
+    height: 72,
     borderRadius: Spacing.radius.small,
     backgroundColor: Colors.input,
-    flexShrink: 0,
   },
+  listReminder: { alignSelf: "flex-start" },
   // card variant
   cardContainer: {
     backgroundColor: Colors.card,
     borderRadius: Spacing.radius.medium,
     overflow: "hidden",
+  },
+  cardThumbWrap: {
+    width: "100%",
+    height: 180,
+    position: "relative",
   },
   cardThumb: {
     width: "100%",
@@ -142,6 +205,59 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: Spacing.padding.medium,
     gap: Spacing.gap.small,
+  },
+  cardMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: Spacing.gap.small,
+  },
+  noteRow: {
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.gold,
+    paddingLeft: Spacing.gap.small,
+  },
+  noteText: {
+    fontSize: Typography.fontSize.small,
+    color: Colors.secondary,
+    fontStyle: "italic",
+  },
+  // badges
+  badge: {
+    position: "absolute",
+    top: Spacing.padding.small,
+    left: Spacing.padding.small,
+    width: FAVICON_BADGE + 8,
+    height: FAVICON_BADGE + 8,
+    borderRadius: Spacing.radius.small,
+    backgroundColor: Colors.card,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  durationBadge: {
+    position: "absolute",
+    bottom: Spacing.padding.small,
+    right: Spacing.padding.small,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    borderRadius: Spacing.radius.xs,
+    paddingHorizontal: Spacing.padding.xs,
+    paddingVertical: 1,
+  },
+  durationText: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.small,
+    fontWeight: "600",
+  },
+  reminderTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.xs,
+    flexShrink: 0,
+  },
+  reminderText: {
+    fontSize: Typography.fontSize.small,
+    color: Colors.gold,
+    fontWeight: "600",
   },
   // shared
   thumbFallback: {
@@ -174,6 +290,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.gap.xs,
+    flexShrink: 1,
   },
   groupDot: {
     width: DOT_SIZE,

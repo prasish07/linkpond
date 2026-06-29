@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteReminder,
+  getActiveReminders,
   getReminderByLinkId,
   insertReminder,
 } from "../data/reminders.repo";
@@ -14,6 +15,18 @@ export const useReminder = (linkId: string) =>
   useQuery({
     queryKey: ["reminder", linkId],
     queryFn: () => getReminderByLinkId(linkId),
+  });
+
+/** Map of link_id -> earliest pending remind_at, for showing badges on cards. */
+export const useActiveReminders = () =>
+  useQuery({
+    queryKey: ["activeReminders"],
+    queryFn: async () => {
+      const rows = await getActiveReminders();
+      return Object.fromEntries(
+        rows.map((r) => [r.link_id, r.remind_at])
+      ) as Record<string, number>;
+    },
   });
 
 export const useSetReminder = (linkId: string) => {
@@ -30,8 +43,10 @@ export const useSetReminder = (linkId: string) => {
         notification_id: notificationId,
       });
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["reminder", linkId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminder", linkId] });
+      queryClient.invalidateQueries({ queryKey: ["activeReminders"] });
+    },
   });
 };
 
@@ -48,7 +63,9 @@ export const useDeleteReminder = (linkId: string) => {
 
       await deleteReminder(reminder.id);
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["reminder", linkId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminder", linkId] });
+      queryClient.invalidateQueries({ queryKey: ["activeReminders"] });
+    },
   });
 };
