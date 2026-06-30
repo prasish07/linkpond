@@ -1,6 +1,8 @@
 import { ReactNode, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Swipeable } from "react-native-gesture-handler";
+import ReanimatedSwipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 import { Ionicons } from "@expo/vector-icons";
 import { Touchable } from "@/components/Touchable";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -25,7 +27,7 @@ type Props = {
  * archive view.
  */
 export const SwipeableRow = ({ children, actions }: Props) => {
-  const ref = useRef<Swipeable>(null);
+  const ref = useRef<SwipeableMethods>(null);
 
   const renderRightActions = () => (
     <View style={styles.actions}>
@@ -46,7 +48,7 @@ export const SwipeableRow = ({ children, actions }: Props) => {
   );
 
   return (
-    <Swipeable
+    <ReanimatedSwipeable
       ref={ref}
       renderRightActions={renderRightActions}
       overshootRight={false}
@@ -54,7 +56,7 @@ export const SwipeableRow = ({ children, actions }: Props) => {
       rightThreshold={ACTION_WIDTH / 2}
     >
       <View>{children}</View>
-    </Swipeable>
+    </ReanimatedSwipeable>
   );
 };
 
