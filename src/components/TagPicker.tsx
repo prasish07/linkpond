@@ -137,12 +137,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.input,
     borderRadius: Spacing.radius.xlarge,
     paddingHorizontal: Spacing.padding.medium,
-    height: CHIP_HEIGHT,
+    paddingVertical: Spacing.padding.small,
   },
   inlineInput: {
     color: Colors.primary,
     fontSize: Typography.fontSize.small,
     width: 100,
+    padding: 0,
+    includeFontPadding: false,
   },
   confirmBtn: {
     backgroundColor: Colors.gold,
