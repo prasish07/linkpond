@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
+    alignSelf: "flex-start",
     gap: Spacing.gap.xs,
     backgroundColor: Colors.input,
     borderRadius: Spacing.radius.xlarge,
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   inlineInput: {
     color: Colors.primary,
     fontSize: Typography.fontSize.small,
-    minWidth: 80,
+    width: 100,
   },
   confirmBtn: {
     backgroundColor: Colors.gold,
