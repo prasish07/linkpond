@@ -135,17 +135,18 @@ export const useMarkOpened = () => {
   });
 };
 
-export const useDeleteLink = () => {
+export const useDeleteLink = (options?: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const toast = useToast();
 
   return useMutation({
     mutationFn: (id: string) => deleteLink(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
-      router.back();
+      queryClient.invalidateQueries({ queryKey: ["archivedLinks"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
       toast("Link deleted");
+      options?.onSuccess?.();
     },
   });
 };

@@ -11,12 +11,17 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
-import { useLinks, useSetArchived } from "@/features/links/hooks/useLinksHooks";
+import {
+  useLinks,
+  useSetArchived,
+  useDeleteLink,
+} from "@/features/links/hooks/useLinksHooks";
 import {
   useGroups,
   useDeleteGroup,
 } from "@/features/groups/hooks/useGroupsHooks";
 import { SwipeableRow } from "@/components/SwipeableRow";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 import { Link } from "@/features/links/types";
 import { timeAgo } from "@/lib/timeAgo";
 import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
@@ -34,6 +39,7 @@ export default function GroupDetailScreen() {
   const { data: reminders = {} } = useActiveReminders();
   const { mutate: deleteGroup } = useDeleteGroup();
   const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
 
   useFocusEffect(
     useCallback(() => {
@@ -86,10 +92,20 @@ export default function GroupDetailScreen() {
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
       <SwipeableRow
-        actionLabel="Archive"
-        actionIcon="archive-outline"
-        actionColor={Colors.secondary}
-        onAction={() => setArchived({ id: item.id, archived: true })}
+        actions={[
+          {
+            label: "Archive",
+            icon: "archive-outline",
+            color: Colors.secondary,
+            onPress: () => setArchived({ id: item.id, archived: true }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
       >
         <Touchable onPress={() => router.push(`/link/${item.id}`)}>
           <LinkCard
@@ -113,7 +129,7 @@ export default function GroupDetailScreen() {
         </Touchable>
       </SwipeableRow>
     ),
-    [router, group, reminders, setArchived]
+    [router, group, reminders, setArchived, deleteLink]
   );
 
   if (isLoading) {

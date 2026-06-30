@@ -7,11 +7,13 @@ import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
+  useDeleteLink,
   useGroupLinkCounts,
   useLinks,
   useSetArchived,
 } from "@/features/links/hooks/useLinksHooks";
 import { SwipeableRow } from "@/components/SwipeableRow";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -39,6 +41,7 @@ const HomeScreen = () => {
   const { data: groupCounts = {} } = useGroupLinkCounts();
   const { data: reminders = {} } = useActiveReminders();
   const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
   const { clipboardUrl, dismiss } = useClipboardDetect();
 
   useFocusEffect(
@@ -52,10 +55,20 @@ const HomeScreen = () => {
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
       <SwipeableRow
-        actionLabel="Archive"
-        actionIcon="archive-outline"
-        actionColor={Colors.secondary}
-        onAction={() => setArchived({ id: item.id, archived: true })}
+        actions={[
+          {
+            label: "Archive",
+            icon: "archive-outline",
+            color: Colors.secondary,
+            onPress: () => setArchived({ id: item.id, archived: true }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
       >
         <Touchable onPress={() => router.push(`/link/${item.id}`)}>
           <LinkCard
@@ -83,7 +96,7 @@ const HomeScreen = () => {
         </Touchable>
       </SwipeableRow>
     ),
-    [router, viewMode, groupsMap, reminders, setArchived]
+    [router, viewMode, groupsMap, reminders, setArchived, deleteLink]
   );
 
   return (

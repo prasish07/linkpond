@@ -5,40 +5,44 @@ import { Ionicons } from "@expo/vector-icons";
 import { Touchable } from "@/components/Touchable";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 
-const ACTION_WIDTH = 84;
+const ACTION_WIDTH = 76;
+
+export type SwipeAction = {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  onPress: () => void;
+};
 
 type Props = {
   children: ReactNode;
-  actionLabel: string;
-  actionIcon: keyof typeof Ionicons.glyphMap;
-  actionColor: string;
-  onAction: () => void;
+  actions: SwipeAction[];
 };
 
 /**
- * Wraps a row so dragging it left reveals a single action button.
- * Used for swipe-to-archive on lists and swipe-to-restore on the archive view.
+ * Wraps a row so dragging it left reveals one or more action buttons.
+ * Used for swipe-to-archive/delete on lists and swipe-to-restore on the
+ * archive view.
  */
-export const SwipeableRow = ({
-  children,
-  actionLabel,
-  actionIcon,
-  actionColor,
-  onAction,
-}: Props) => {
+export const SwipeableRow = ({ children, actions }: Props) => {
   const ref = useRef<Swipeable>(null);
 
   const renderRightActions = () => (
-    <Touchable
-      style={[styles.action, { backgroundColor: actionColor }]}
-      onPress={() => {
-        ref.current?.close();
-        onAction();
-      }}
-    >
-      <Ionicons name={actionIcon} size={20} color={Colors.body} />
-      <Text style={styles.actionText}>{actionLabel}</Text>
-    </Touchable>
+    <View style={styles.actions}>
+      {actions.map((action) => (
+        <Touchable
+          key={action.label}
+          style={[styles.action, { backgroundColor: action.color }]}
+          onPress={() => {
+            ref.current?.close();
+            action.onPress();
+          }}
+        >
+          <Ionicons name={action.icon} size={20} color={Colors.body} />
+          <Text style={styles.actionText}>{action.label}</Text>
+        </Touchable>
+      ))}
+    </View>
   );
 
   return (
@@ -55,9 +59,13 @@ export const SwipeableRow = ({
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    flexDirection: "row",
+    gap: Spacing.gap.small,
+    paddingLeft: Spacing.gap.small,
+  },
   action: {
     width: ACTION_WIDTH,
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: Spacing.gap.xs,

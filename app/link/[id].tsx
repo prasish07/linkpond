@@ -39,12 +39,14 @@ import { PRESETS, formatReminderDate } from "@/features/reminders/utils";
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: link, isLoading, refetch } = useLinkById(id);
-  const { mutate: deleteLink } = useDeleteLink();
+  const router = useRouter();
+  const { mutate: deleteLink } = useDeleteLink({
+    onSuccess: () => router.back(),
+  });
   const { mutate: markOpened } = useMarkOpened();
   const { mutate: setArchived } = useSetArchived();
   const { data: groups = [] } = useGroups();
   const navigation = useNavigation();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [imgError, setImgError] = useState(false);

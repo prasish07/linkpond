@@ -12,9 +12,14 @@ import { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
-import { useLinks, useSetArchived } from "@/features/links/hooks/useLinksHooks";
+import {
+  useDeleteLink,
+  useLinks,
+  useSetArchived,
+} from "@/features/links/hooks/useLinksHooks";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { SwipeableRow } from "@/components/SwipeableRow";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 import { Link } from "@/features/links/types";
 import { useRouter } from "expo-router";
 import useDebounce from "@/lib/useDebounce";
@@ -47,6 +52,7 @@ const SearchScreen = () => {
   const { data: recentSearches = [] } = useRecentSearches();
   const { mutate: recordSearch } = useRecordSearch();
   const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
   const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
@@ -62,10 +68,20 @@ const SearchScreen = () => {
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
       <SwipeableRow
-        actionLabel="Archive"
-        actionIcon="archive-outline"
-        actionColor={Colors.secondary}
-        onAction={() => setArchived({ id: item.id, archived: true })}
+        actions={[
+          {
+            label: "Archive",
+            icon: "archive-outline",
+            color: Colors.secondary,
+            onPress: () => setArchived({ id: item.id, archived: true }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
       >
         <Touchable onPress={() => router.push(`/link/${item.id}`)}>
           <LinkCard
@@ -92,7 +108,7 @@ const SearchScreen = () => {
         </Touchable>
       </SwipeableRow>
     ),
-    [router, groupsMap, reminders, setArchived]
+    [router, groupsMap, reminders, setArchived, deleteLink]
   );
 
   return (

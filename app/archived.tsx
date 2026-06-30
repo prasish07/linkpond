@@ -8,17 +8,20 @@ import { SwipeableRow } from "@/components/SwipeableRow";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import {
   useArchivedLinks,
+  useDeleteLink,
   useSetArchived,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { Link } from "@/features/links/types";
 import { timeAgo } from "@/lib/timeAgo";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 
 export default function ArchivedScreen() {
   const router = useRouter();
   const { data: links = [], refetch } = useArchivedLinks();
   const { data: groups = [] } = useGroups();
   const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
   useFocusEffect(
@@ -30,10 +33,20 @@ export default function ArchivedScreen() {
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
       <SwipeableRow
-        actionLabel="Restore"
-        actionIcon="arrow-undo-outline"
-        actionColor={Colors.confirm}
-        onAction={() => setArchived({ id: item.id, archived: false })}
+        actions={[
+          {
+            label: "Restore",
+            icon: "arrow-undo-outline",
+            color: Colors.confirm,
+            onPress: () => setArchived({ id: item.id, archived: false }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
       >
         <Touchable onPress={() => router.push(`/link/${item.id}`)}>
           <LinkCard
@@ -58,7 +71,7 @@ export default function ArchivedScreen() {
         </Touchable>
       </SwipeableRow>
     ),
-    [router, groupsMap, setArchived]
+    [router, groupsMap, setArchived, deleteLink]
   );
 
   return (
