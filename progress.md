@@ -166,7 +166,7 @@ The flat "all links forever" list gets cluttered fast. Two sub-problems:
    - All list queries already filter `is_archived = 0`, so archived links drop out automatically.
    - **Next session: verify on device, then merge, then start step 2.**
 
-2. **"Unopened" default emphasis** — ✅ **DONE on branch `feature/unopened-emphasis` (PR open).**
+2. **"Unopened" default emphasis** — ✅ **DONE & MERGED (PR #27).**
    - Home `FlatList` → `SectionList` with **Unopened** / **Read** sections (partitioned on `opened_at`; empty sections dropped). Sort toggle now sorts *within* each section.
    - `LinkCard` gained a `dimmed?` prop (`opacity: 0.55`) applied to opened rows in both card + list variants.
    - Repo layer untouched — sections do the unopened-first grouping, not SQL.
@@ -206,10 +206,11 @@ The flat "all links forever" list gets cluttered fast. Two sub-problems:
 ## Last session
 
 - Date: 2026-06-30
-- **Open branch: `feature/unopened-emphasis` (PR open, NOT merged)** — declutter step 2 (Unopened/Read SectionList + dimmed opened cards). Verified on device (looks good).
+- **No open branch.** Declutter steps 1 & 2 merged. Working tree clean on `main`.
 - **NEXT SESSION: start at declutter step 3 (Tags)** — `tags` + `link_tags` tables exist but are unused; add tag CRUD, tag chips on cards, tag filtering. Then step 4 (date sectioning/compact) → step 5 (Phase 10 resurfacing).
 
 Recent PRs merged:
+- #27 — unopened emphasis (declutter step 2): Unopened/Read SectionList + dimmed read cards
 - #26 — archive links (declutter step 1): swipe Archive/Delete + Restore, Archived screen
 - #25 — duplicate URL detection (canonicalizeUrl)
 - #24 — card redesign, reminder badges, toasts, recent searches + "Has reminder" filter
