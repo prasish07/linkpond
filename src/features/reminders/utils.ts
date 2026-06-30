@@ -42,3 +42,27 @@ export const formatReminderDate = (timestamp: number) => {
   const time = d.toLocaleString("en-US", { hour: "numeric", minute: "2-digit" });
   return `${day} ${month}, ${year} at ${time}`;
 };
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+/** Compact reminder label for cards, e.g. "Tomorrow, 9:00" or "Jun 30, 9:00". */
+export const formatReminderShort = (timestamp: number) => {
+  const d = new Date(timestamp * 1000);
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+
+  const time = d.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  if (isSameDay(d, now)) return `Today, ${time}`;
+  if (isSameDay(d, tomorrow)) return `Tomorrow, ${time}`;
+  const md = d.toLocaleString("en-US", { month: "short", day: "numeric" });
+  return `${md}, ${time}`;
+};

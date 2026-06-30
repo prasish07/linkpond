@@ -14,6 +14,10 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useLinks, useMarkOpened } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import {
+  useActiveReminders,
+} from "@/features/reminders/hooks/useRemindersHooks";
+import { formatReminderShort } from "@/features/reminders/utils";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { timeAgo } from "@/lib/timeAgo";
 
@@ -24,6 +28,7 @@ export default function ResurfaceScreen() {
   const router = useRouter();
   const { data: links = [], refetch } = useLinks();
   const { data: groups = [] } = useGroups();
+  const { data: reminders = {} } = useActiveReminders();
   const { mutate: markOpened } = useMarkOpened();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
@@ -149,6 +154,9 @@ export default function ResurfaceScreen() {
                         savedAt: timeAgo(item.created_at),
                         preview: item.thumbnail_url ? "rich" : "fallback",
                         thumb: item.thumbnail_url ?? undefined,
+                        reminder: reminders[item.id]
+                          ? formatReminderShort(reminders[item.id])
+                          : undefined,
                         groupName: item.group_id
                           ? groupsMap[item.group_id]?.name
                           : undefined,

@@ -18,6 +18,8 @@ import {
 } from "@/features/groups/hooks/useGroupsHooks";
 import { Link } from "@/features/links/types";
 import { timeAgo } from "@/lib/timeAgo";
+import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
+import { formatReminderShort } from "@/features/reminders/utils";
 
 export default function GroupDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,6 +30,7 @@ export default function GroupDetailScreen() {
   const group = groups.find((g) => g.id === id);
 
   const { data: links = [], isLoading, refetch } = useLinks(id);
+  const { data: reminders = {} } = useActiveReminders();
   const { mutate: deleteGroup } = useDeleteGroup();
 
   useFocusEffect(
@@ -91,6 +94,9 @@ export default function GroupDetailScreen() {
             preview: item.thumbnail_url ? "rich" : "fallback",
             thumb: item.thumbnail_url ?? undefined,
             note: item.note ?? undefined,
+            reminder: reminders[item.id]
+              ? formatReminderShort(reminders[item.id])
+              : undefined,
             groupName: group?.name,
             groupColor: group?.color,
           }}
@@ -98,7 +104,7 @@ export default function GroupDetailScreen() {
         />
       </Touchable>
     ),
-    [router, group]
+    [router, group, reminders]
   );
 
   if (isLoading) {

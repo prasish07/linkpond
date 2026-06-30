@@ -6,6 +6,7 @@ import {
   deleteGroup,
 } from "@/features/groups/data/groups.repo";
 import { useRouter } from "expo-router";
+import { useToast } from "@/components/Toast";
 
 export const useGroups = () =>
   useQuery({
@@ -16,6 +17,7 @@ export const useGroups = () =>
 export const useAddGroup = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (group: { name: string; color: string; icon: string }) => {
@@ -25,6 +27,7 @@ export const useAddGroup = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       router.back();
+      toast("Group created");
     },
     onError: (error) => {
       console.error("Failed to create group:", error);
@@ -36,6 +39,7 @@ export const useAddGroup = () => {
 export const useUpdateGroup = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (group: {
@@ -48,6 +52,7 @@ export const useUpdateGroup = () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       queryClient.invalidateQueries({ queryKey: ["links"] });
       router.back();
+      toast("Group updated");
     },
     onError: (error) => {
       console.error("Failed to update group:", error);
@@ -59,6 +64,7 @@ export const useUpdateGroup = () => {
 export const useDeleteGroup = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (id: string) => deleteGroup(id),
@@ -67,6 +73,7 @@ export const useDeleteGroup = () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
       queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
       router.back();
+      toast("Group deleted");
     },
     onError: (error) => {
       console.error("Failed to delete group:", error);

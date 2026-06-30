@@ -10,6 +10,7 @@ import {
   setupNotificationChannel,
 } from "@/lib/notifications";
 import * as Notifications from "expo-notifications";
+import { ToastProvider } from "@/components/Toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,34 +62,36 @@ const RootLayout = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ShareIntentProvider>
         <QueryClientProvider client={queryClient}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
-            <Stack.Screen
-              name="link/edit/[id]"
-              options={{
-                presentation: "transparentModal",
-                headerShown: false,
-                animation: "fade",
-              }}
-            />
-            <Stack.Screen
-              name="group/create"
-              options={{
-                presentation: "transparentModal",
-                headerShown: false,
-                animation: "fade",
-              }}
-            />
-            <Stack.Screen
-              name="add"
-              options={{
-                presentation: "transparentModal",
-                headerShown: false,
-                animation: "fade",
-              }}
-            />
-          </Stack>
+          <ToastProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
+              <Stack.Screen
+                name="link/edit/[id]"
+                options={{
+                  presentation: "transparentModal",
+                  headerShown: false,
+                  animation: "fade",
+                }}
+              />
+              <Stack.Screen
+                name="group/create"
+                options={{
+                  presentation: "transparentModal",
+                  headerShown: false,
+                  animation: "fade",
+                }}
+              />
+              <Stack.Screen
+                name="add"
+                options={{
+                  presentation: "transparentModal",
+                  headerShown: false,
+                  animation: "fade",
+                }}
+              />
+            </Stack>
+          </ToastProvider>
         </QueryClientProvider>
       </ShareIntentProvider>
     </GestureHandlerRootView>

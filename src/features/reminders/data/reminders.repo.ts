@@ -25,6 +25,16 @@ export const getReminderByLinkId = async (
   );
 };
 
+export const getActiveReminders = async (): Promise<
+  { link_id: string; remind_at: number }[]
+> => {
+  // earliest pending reminder per link
+  return db.getAllAsync<{ link_id: string; remind_at: number }>(
+    `SELECT link_id, MIN(remind_at) as remind_at
+     FROM reminders WHERE is_done = 0 GROUP BY link_id`
+  );
+};
+
 export const deleteReminder = async (id: string): Promise<void> => {
   await db.runAsync(`DELETE FROM reminders WHERE id = ?`, [id]);
 };
