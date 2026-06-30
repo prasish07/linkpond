@@ -11,6 +11,7 @@ import {
 } from "@/lib/notifications";
 import * as Notifications from "expo-notifications";
 import { ToastProvider } from "@/components/Toast";
+import { Colors } from "@/theme/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,6 +67,15 @@ const RootLayout = () => {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="link/[id]" options={{ title: "Link" }} />
+              <Stack.Screen
+                name="archived"
+                options={{
+                  title: "Archived",
+                  headerStyle: { backgroundColor: Colors.header },
+                  headerTintColor: Colors.primary,
+                  headerShadowVisible: false,
+                }}
+              />
               <Stack.Screen
                 name="link/edit/[id]"
                 options={{

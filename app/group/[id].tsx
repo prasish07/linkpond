@@ -11,11 +11,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
-import { useLinks } from "@/features/links/hooks/useLinksHooks";
+import { useLinks, useSetArchived } from "@/features/links/hooks/useLinksHooks";
 import {
   useGroups,
   useDeleteGroup,
 } from "@/features/groups/hooks/useGroupsHooks";
+import { SwipeableRow } from "@/components/SwipeableRow";
 import { Link } from "@/features/links/types";
 import { timeAgo } from "@/lib/timeAgo";
 import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
@@ -32,6 +33,7 @@ export default function GroupDetailScreen() {
   const { data: links = [], isLoading, refetch } = useLinks(id);
   const { data: reminders = {} } = useActiveReminders();
   const { mutate: deleteGroup } = useDeleteGroup();
+  const { mutate: setArchived } = useSetArchived();
 
   useFocusEffect(
     useCallback(() => {
@@ -83,28 +85,35 @@ export default function GroupDetailScreen() {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
-        <LinkCard
-          item={{
-            id: item.id,
-            title: item.title ?? "Untitled",
-            source: item.site_name ?? item.url,
-            domain: item.url,
-            savedAt: timeAgo(item.created_at),
-            preview: item.thumbnail_url ? "rich" : "fallback",
-            thumb: item.thumbnail_url ?? undefined,
-            note: item.note ?? undefined,
-            reminder: reminders[item.id]
-              ? formatReminderShort(reminders[item.id])
-              : undefined,
-            groupName: group?.name,
-            groupColor: group?.color,
-          }}
-          variant="list"
-        />
-      </Touchable>
+      <SwipeableRow
+        actionLabel="Archive"
+        actionIcon="archive-outline"
+        actionColor={Colors.secondary}
+        onAction={() => setArchived({ id: item.id, archived: true })}
+      >
+        <Touchable onPress={() => router.push(`/link/${item.id}`)}>
+          <LinkCard
+            item={{
+              id: item.id,
+              title: item.title ?? "Untitled",
+              source: item.site_name ?? item.url,
+              domain: item.url,
+              savedAt: timeAgo(item.created_at),
+              preview: item.thumbnail_url ? "rich" : "fallback",
+              thumb: item.thumbnail_url ?? undefined,
+              note: item.note ?? undefined,
+              reminder: reminders[item.id]
+                ? formatReminderShort(reminders[item.id])
+                : undefined,
+              groupName: group?.name,
+              groupColor: group?.color,
+            }}
+            variant="list"
+          />
+        </Touchable>
+      </SwipeableRow>
     ),
-    [router, group, reminders]
+    [router, group, reminders, setArchived]
   );
 
   if (isLoading) {

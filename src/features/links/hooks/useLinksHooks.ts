@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteLink,
   getAllLinks,
+  getArchivedLinks,
   getLinkById,
   getLinkCountsByGroup,
   insertLink,
   markLinkOpened,
+  setLinkArchived,
   updateLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
@@ -94,6 +96,29 @@ export const useUpdateLink = () => {
     onError: (error) => {
       console.error("Failed to update link:", error);
       alert("Failed to update link. Please try again.");
+    },
+  });
+};
+
+export const useArchivedLinks = () =>
+  useQuery({
+    queryKey: ["archivedLinks"],
+    queryFn: getArchivedLinks,
+  });
+
+export const useSetArchived = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
+      setLinkArchived(id, archived),
+    onSuccess: (_data, { archived }) => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedLinks"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
+      queryClient.invalidateQueries({ queryKey: ["link"] });
+      toast(archived ? "Link archived" : "Link restored");
     },
   });
 };

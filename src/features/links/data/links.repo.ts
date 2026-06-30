@@ -101,6 +101,22 @@ export const updateLink = async (link: {
   );
 };
 
+export const setLinkArchived = async (
+  id: string,
+  archived: boolean
+): Promise<void> => {
+  await db.runAsync(`UPDATE links SET is_archived = ? WHERE id = ?`, [
+    archived ? 1 : 0,
+    id,
+  ]);
+};
+
+export const getArchivedLinks = async (): Promise<Link[]> => {
+  return db.getAllAsync<Link>(
+    `SELECT * FROM links WHERE is_archived = 1 ORDER BY created_at DESC`
+  );
+};
+
 export const markLinkOpened = async (id: string): Promise<void> => {
   // only stamp the first open so we keep the original "opened" moment
   await db.runAsync(
