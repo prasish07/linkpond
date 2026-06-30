@@ -154,17 +154,38 @@ follow-ups remain (see Pending todos).
 | Builds | EAS cloud builds for dev builds |
 | Dev machine | Mac (also has Android emulator available) |
 
-## Pending todos
+## Decluttering the link list — CURRENT FOCUS (work in this order)
 
-- **Duplicate URL detection** — on URL entry in Add sheet, after preview loads, query DB for matching URL (`getLinkByUrl` already exists). If found and `opened_at IS NULL` → "You saved this and haven't opened it — open it or save again?". If found and opened → softer "Already in your list". **Unblocked:** `opened_at` column + `markLinkOpened` already shipped.
-- **"+ New group" in Add sheet** — add a `+` chip at the end of the group row. Tapping it opens the Create Group sheet stacked on top of the Add sheet; after save, the new group auto-selects. Stacked sheet (not inline expansion).
-- **Platform filter chips on Search** — design #34 shows a "YouTube" chip; build dynamic per-platform filters derived from saved links' domains. (Only "Has reminder" shipped so far.)
+The flat "all links forever" list gets cluttered fast. Two sub-problems:
+(a) scanning density, (b) the read-later graveyard. Agreed plan, in priority order:
+
+1. **Archive** (`is_archived`) — ⏳ **DONE on branch `feature/archive-links` (PR open — test on device, then merge).**
+   - `setLinkArchived` / `getArchivedLinks`, `useSetArchived` / `useArchivedLinks`.
+   - Reusable `src/components/SwipeableRow.tsx` (ReanimatedSwipeable) — swipe a row left for **Archive + Delete** (lists) / **Restore + Delete** (archived screen). Delete uses shared `confirmDeleteLink`.
+   - Archive/Unarchive action in link detail header; `app/archived.tsx` reached via archive icon in home header.
+   - All list queries already filter `is_archived = 0`, so archived links drop out automatically.
+   - **Next session: verify on device, then merge, then start step 2.**
+
+2. **"Unopened" default emphasis** — `opened_at` already shipped. Lead the home list with unopened (section "Unopened" first, or a default "Unopened only" filter); dim/de-emphasize opened links so what you haven't read pops.
+
+3. **Tags** — the `tags` + `link_tags` tables already exist but are unused. Cross-cutting organization (a link can have many tags). Add tag CRUD, tag chips on cards, and tag filtering. Biggest structural win after archive.
+
+4. **Date sectioning + compact mode** — switch the home FlatList to a SectionList grouped by *Today / This week / This month / Earlier*; add a third "compact" density (single line, tiny favicon, no thumbnail) alongside the card/list toggle.
+
+5. **Phase 10 — spaced resurfacing engine** — the strategic anti-clutter fix: hand back a few oldest-unopened at a time instead of a wall. Real scheduling logic behind the Resurface tab (currently an oldest-unopened stand-in). Likely needs a resurface schedule/interval per link.
+
+## Other pending todos (lower priority)
+
+- **"+ New group" in Add sheet** — `+` chip at the end of the group row opens the Create Group sheet stacked on top; after save the new group auto-selects.
+- **Platform filter chips on Search** — design #34's "YouTube" chip; dynamic per-platform filters from saved links' domains. (Only "Has reminder" shipped.)
 - **Group-add UI polish** — match prototype #31 spacing/preview (deferred).
-- **Phase 10 — spaced resurfacing engine** — real scheduling logic behind the Resurface tab (currently oldest-unopened stand-in). Likely needs a resurface schedule/interval per link.
+- **Icon/splash** — branded assets shipped but need a fresh dev build to actually appear (native config).
 
 ## Schema notes (current)
 
 - `links.opened_at INTEGER` — stamped on first "Open original"/"Open now" (migration via `PRAGMA table_info` guard in `db/client.ts`).
+- `links.is_archived INTEGER` — in base schema; archive feature uses it (all active list queries filter `is_archived = 0`).
+- `tags` + `link_tags` tables — exist in base schema but UNUSED yet (target for declutter step 3).
 - `recent_searches(term PK, searched_at)` — backs Search "recent searches".
 - Migration pattern: expo-sqlite has no auto-migrations; new **tables** use `CREATE TABLE IF NOT EXISTS`, new **columns** use a guarded `ALTER TABLE` in `runMigrations()`.
 
@@ -173,26 +194,22 @@ follow-ups remain (see Pending todos).
 - `src/components/Touchable.tsx` — Pressable + Android ripple (drop-in for TouchableOpacity).
 - `src/components/Skeleton.tsx` + `LinkListSkeleton` — loading placeholders.
 - `src/components/Toast.tsx` — `ToastProvider` + `useToast()` (fired from create/update/delete mutations).
+- `src/components/SwipeableRow.tsx` — swipe-left action tray (ReanimatedSwipeable), takes `actions[]`.
+- `src/features/links/confirmDelete.ts` — shared "Delete link?" Alert (`confirmDeleteLink`).
+- `src/lib/canonicalizeUrl.ts` — URL canonical key for duplicate detection.
 
 ---
 
 ## Last session
 
 - Date: 2026-06-30
-- Branch: `main` (after merging PRs #21–#24)
+- **Open branch: `feature/archive-links` (PR open, NOT merged)** — Archive feature (declutter step 1). Tested partially; verify swipe Archive/Delete + Restore on device, then merge.
+- **NEXT SESSION: start at "Decluttering the link list" above.** After merging archive, do step 2 (Unopened emphasis) → step 3 (Tags) → step 4 (sectioning/compact) → step 5 (Phase 10 resurfacing).
 
 Recent PRs merged:
+- #25 — duplicate URL detection (canonicalizeUrl)
 - #24 — card redesign, reminder badges, toasts, recent searches + "Has reminder" filter
 - #23 — detail/edit screens, group management, shared FAB, Resurface preview, skeletons, branded icon/splash, opened_at
-- #21 — clipboard auto-detect
 
-Recent PRs merged this session:
-- PR #22 — Phase 8 reminders with local notifications (`feature/phase-8-reminders`)
-- PR #21 — Phase 7 clipboard auto-detect banner
-
-Recent commits:
-```
-b8b8a8b Merge pull request #22 from prasish07/feature/phase-8-reminders
-2ab990a feat: Phase 8 — reminders with local notifications
-de13769 chore: mark Phase 7 done, advance to Phase 8
-```
+Older merged:
+- #22 — Phase 8 reminders with local notifications
