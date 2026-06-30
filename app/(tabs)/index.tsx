@@ -1,4 +1,4 @@
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, SectionList, StyleSheet, Text, View } from "react-native";
 import { Touchable } from "@/components/Touchable";
 import { LinkListSkeleton } from "@/features/links/components/LinkListSkeleton";
 import { useCallback, useState } from "react";
@@ -50,7 +50,13 @@ const HomeScreen = () => {
     }, [refetch])
   );
 
-  const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
+  const sorted = sort === "oldest" ? [...links].reverse() : links;
+  const unopened = sorted.filter((l) => l.opened_at == null);
+  const opened = sorted.filter((l) => l.opened_at != null);
+  const sections = [
+    { title: "Unopened", data: unopened },
+    { title: "Read", data: opened },
+  ].filter((s) => s.data.length > 0);
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
@@ -92,6 +98,7 @@ const HomeScreen = () => {
                 : undefined,
             }}
             variant={viewMode}
+            dimmed={item.opened_at != null}
           />
         </Touchable>
       </SwipeableRow>
@@ -228,12 +235,19 @@ const HomeScreen = () => {
           </Touchable>
         </View>
       ) : (
-        <FlatList
-          data={sortedLinks}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => item.id}
           style={styles.listContainer}
           contentContainerStyle={styles.list}
           renderItem={renderLink}
+          stickySectionHeadersEnabled={false}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              <Text style={styles.sectionCount}>{section.data.length}</Text>
+            </View>
+          )}
           ListHeaderComponent={
             <View>
               <View style={styles.metaRow}>
@@ -398,6 +412,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.gap.xs,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    backgroundColor: Colors.body,
+    paddingTop: Spacing.padding.small,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.small,
+    fontFamily: Typography.fontFamily,
+    fontWeight: "600",
+    color: Colors.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  sectionCount: {
+    fontSize: Typography.fontSize.small,
+    fontFamily: Typography.fontFamily,
+    color: Colors.tertiary,
   },
 });
 

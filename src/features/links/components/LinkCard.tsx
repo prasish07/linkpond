@@ -24,12 +24,13 @@ type LinkItem = {
 type Props = {
   item: LinkItem;
   variant?: "card" | "list";
+  dimmed?: boolean;
 };
 
 const DOT_SIZE = 7;
 const FAVICON_BADGE = 18;
 
-export const LinkCard = ({ item, variant }: Props) => {
+export const LinkCard = ({ item, variant, dimmed }: Props) => {
   const [imgError, setImgError] = useState(false);
 
   const showFallback = !item.thumb || imgError;
@@ -63,7 +64,7 @@ export const LinkCard = ({ item, variant }: Props) => {
 
   if (variant === "card") {
     return (
-      <View style={styles.cardContainer}>
+      <View style={[styles.cardContainer, dimmed && styles.dimmed]}>
         <View style={styles.cardThumbWrap}>
           {!showFallback ? (
             <Image
@@ -116,7 +117,7 @@ export const LinkCard = ({ item, variant }: Props) => {
   }
 
   return (
-    <View style={styles.listContainer}>
+    <View style={[styles.listContainer, dimmed && styles.dimmed]}>
       <View style={styles.listThumbWrap}>
         {!showFallback ? (
           <Image
@@ -256,6 +257,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   // shared
+  dimmed: {
+    opacity: 0.55,
+  },
   thumbFallback: {
     justifyContent: "center",
     alignItems: "center",
