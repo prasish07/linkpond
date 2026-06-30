@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
-import { useAddLink } from "@/features/links/hooks/useLinksHooks";
+import { useAddLink, useLinkByUrl } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { timeAgo } from "@/lib/timeAgo";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
@@ -72,6 +73,14 @@ export default function AddScreen() {
   });
 
   const isSettled = url.trim() === trimmedUrl; // has the debounce caught up to what I typed?
+
+  // duplicate detection: do we already have this exact URL?
+  const { data: existing } = useLinkByUrl(normalizedUrl);
+  const duplicate = isSettled && existing ? existing : null;
+
+  const openExisting = () => {
+    if (duplicate) router.replace(`/link/${duplicate.id}`);
+  };
 
   const previewState: PreviewState = !url.trim()
     ? { status: "idle" }
@@ -176,6 +185,36 @@ export default function AddScreen() {
               keyboardType="url"
             />
           </View>
+
+          {duplicate && (
+            <Touchable
+              style={[
+                styles.dupBanner,
+                !duplicate.opened_at && styles.dupBannerWarn,
+              ]}
+              onPress={openExisting}
+            >
+              <Ionicons
+                name={duplicate.opened_at ? "information-circle" : "alert-circle"}
+                size={18}
+                color={duplicate.opened_at ? Colors.secondary : Colors.gold}
+              />
+              <View style={styles.dupBody}>
+                <Text style={styles.dupTitle}>
+                  {duplicate.opened_at
+                    ? "Already in your list"
+                    : "Saved but not opened yet"}
+                </Text>
+                <Text style={styles.dupSubtitle} numberOfLines={1}>
+                  {duplicate.opened_at
+                    ? `Saved ${timeAgo(duplicate.created_at)}`
+                    : `You saved this ${timeAgo(duplicate.created_at)} — open it or save again`}
+                </Text>
+              </View>
+              <Text style={styles.dupAction}>Open</Text>
+            </Touchable>
+          )}
+
           {previewState.status === "idle" && (
             <View style={styles.tryRow}>
               <Text style={styles.tryLabel}>Try:</Text>
@@ -526,6 +565,35 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.padding.small,
   },
   tryChipText: { color: Colors.secondary, fontSize: Typography.fontSize.small },
+  dupBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    backgroundColor: Colors.input,
+    borderRadius: Spacing.radius.medium,
+    padding: Spacing.padding.medium,
+    borderWidth: 1,
+    borderColor: Colors.input,
+  },
+  dupBannerWarn: {
+    borderColor: Colors.gold,
+  },
+  dupBody: { flex: 1 },
+  dupTitle: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.small,
+    fontWeight: "600",
+  },
+  dupSubtitle: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSize.small,
+    marginTop: 2,
+  },
+  dupAction: {
+    color: Colors.gold,
+    fontSize: Typography.fontSize.small,
+    fontWeight: "700",
+  },
 
   previewCard: {
     flexDirection: "row",

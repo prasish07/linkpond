@@ -3,6 +3,7 @@ import {
   deleteLink,
   getAllLinks,
   getLinkById,
+  getLinkByUrl,
   getLinkCountsByGroup,
   insertLink,
   markLinkOpened,
@@ -40,6 +41,14 @@ export const useLinkById = (id: string) =>
   useQuery({
     queryKey: ["link", id],
     queryFn: () => getLinkById(id),
+  });
+
+/** Looks up an existing link by exact (normalized) URL — for duplicate detection. */
+export const useLinkByUrl = (url: string) =>
+  useQuery({
+    queryKey: ["linkByUrl", url],
+    queryFn: () => getLinkByUrl(url),
+    enabled: url.length > 0,
   });
 
 export const useAddLink = (options?: { onSuccess?: () => void }) => {
