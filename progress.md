@@ -4,10 +4,19 @@
 
 ---
 
-## Current phase: Phase 9 — Polish
+## Current phase: Phase 9 ✅ done → Phase 10 (v2) next
 
-**Learning goal:** Empty states, loading skeletons, app icon, splash screen.
-**Build goal:** App feels complete and shippable — no blank screens, no jarring transitions, proper branding.
+**Phase 9 (Polish) shipped:** skeletons, branded app icon + splash, ripple press
+feedback, toasts, empty states, card redesign + reminder badges, detail/edit
+screens, group detail + edit/delete, recent searches + "Has reminder" filter,
+`opened_at` tracking.
+
+**Next big feature — Phase 10:** spaced resurfacing engine (the Resurface tab is
+currently a visual preview fed by oldest-unopened links). A few small polish
+follow-ups remain (see Pending todos).
+
+> ⚠️ **Icon/splash need a fresh dev build to appear** — they're native config,
+> not visible over Metro.
 
 ---
 
@@ -112,9 +121,8 @@
 | 6b | ✅ Done | Return to source app after share-intent save — config plugin + moveTaskToBack |
 | 7 | ✅ Done | Clipboard auto-detect — foreground lifecycle |
 | 8 | ✅ Done | Reminders — local notifications, deep link from notification |
-| 9 | Next | Polish — empty states, skeletons, app icon, splash |
-| 9 | | Polish — empty states, skeletons, app icon, splash |
-| 10 (v2) | | Spaced resurfacing engine |
+| 9 | ✅ Done | Polish — skeletons, icon/splash, ripple, toasts, card redesign, reminder badges |
+| 10 (v2) | Next | Spaced resurfacing engine (Resurface tab is a preview today) |
 
 ---
 
@@ -148,16 +156,35 @@
 
 ## Pending todos
 
-- **"+ New group" in Add sheet** — add a `+` chip at the end of the group row. Tapping it opens the Create Group sheet stacked on top of the Add sheet. After save, new group auto-selects in Add sheet. Design decision: stacked sheet (not inline expansion) to keep the Add sheet focused.
-- **Home screen safe area fix** — `SafeAreaView` on index.tsx should use `edges={['top']}` (tab bar handles bottom). Also revert `container` background from debug red back to `Colors.body`.
-- **Duplicate URL detection (future)** — on URL entry in Add sheet, after preview loads, query DB for matching URL. If found and `opened_at IS NULL` → "You saved this on [date] and haven't opened it — open it or save again?". If found and `opened_at` set → softer "Already in your list". Requires adding `opened_at` column to `links` table and writing it when a link card is tapped.
+- **Duplicate URL detection** — on URL entry in Add sheet, after preview loads, query DB for matching URL (`getLinkByUrl` already exists). If found and `opened_at IS NULL` → "You saved this and haven't opened it — open it or save again?". If found and opened → softer "Already in your list". **Unblocked:** `opened_at` column + `markLinkOpened` already shipped.
+- **"+ New group" in Add sheet** — add a `+` chip at the end of the group row. Tapping it opens the Create Group sheet stacked on top of the Add sheet; after save, the new group auto-selects. Stacked sheet (not inline expansion).
+- **Platform filter chips on Search** — design #34 shows a "YouTube" chip; build dynamic per-platform filters derived from saved links' domains. (Only "Has reminder" shipped so far.)
+- **Group-add UI polish** — match prototype #31 spacing/preview (deferred).
+- **Phase 10 — spaced resurfacing engine** — real scheduling logic behind the Resurface tab (currently oldest-unopened stand-in). Likely needs a resurface schedule/interval per link.
+
+## Schema notes (current)
+
+- `links.opened_at INTEGER` — stamped on first "Open original"/"Open now" (migration via `PRAGMA table_info` guard in `db/client.ts`).
+- `recent_searches(term PK, searched_at)` — backs Search "recent searches".
+- Migration pattern: expo-sqlite has no auto-migrations; new **tables** use `CREATE TABLE IF NOT EXISTS`, new **columns** use a guarded `ALTER TABLE` in `runMigrations()`.
+
+## Reusable components
+
+- `src/components/Touchable.tsx` — Pressable + Android ripple (drop-in for TouchableOpacity).
+- `src/components/Skeleton.tsx` + `LinkListSkeleton` — loading placeholders.
+- `src/components/Toast.tsx` — `ToastProvider` + `useToast()` (fired from create/update/delete mutations).
 
 ---
 
 ## Last session
 
-- Date: 2026-06-28
-- Branch: `main` (after merging `feature/phase-8-reminders`)
+- Date: 2026-06-30
+- Branch: `main` (after merging PRs #21–#24)
+
+Recent PRs merged:
+- #24 — card redesign, reminder badges, toasts, recent searches + "Has reminder" filter
+- #23 — detail/edit screens, group management, shared FAB, Resurface preview, skeletons, branded icon/splash, opened_at
+- #21 — clipboard auto-detect
 
 Recent PRs merged this session:
 - PR #22 — Phase 8 reminders with local notifications (`feature/phase-8-reminders`)
