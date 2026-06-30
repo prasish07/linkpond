@@ -7,9 +7,13 @@ import { Colors, Spacing, Typography } from "@/theme/theme";
 import { LinkCard } from "@/features/links/components/LinkCard";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
+  useDeleteLink,
   useGroupLinkCounts,
   useLinks,
+  useSetArchived,
 } from "@/features/links/hooks/useLinksHooks";
+import { SwipeableRow } from "@/components/SwipeableRow";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { Group } from "@/features/groups/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,6 +40,8 @@ const HomeScreen = () => {
   const router = useRouter();
   const { data: groupCounts = {} } = useGroupLinkCounts();
   const { data: reminders = {} } = useActiveReminders();
+  const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
   const { clipboardUrl, dismiss } = useClipboardDetect();
 
   useFocusEffect(
@@ -48,32 +54,49 @@ const HomeScreen = () => {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
-        <LinkCard
-          item={{
-            id: item.id,
-            title: item.title ?? "Untitled",
-            source: item.site_name ?? item.url,
-            domain: item.url,
-            savedAt: timeAgo(item.created_at),
-            preview: item.thumbnail_url ? "rich" : "fallback",
-            thumb: item.thumbnail_url ?? undefined,
-            note: item.note ?? undefined,
-            reminder: reminders[item.id]
-              ? formatReminderShort(reminders[item.id])
-              : undefined,
-            groupName: item.group_id
-              ? groupsMap[item.group_id]?.name
-              : undefined,
-            groupColor: item.group_id
-              ? groupsMap[item.group_id]?.color
-              : undefined,
-          }}
-          variant={viewMode}
-        />
-      </Touchable>
+      <SwipeableRow
+        actions={[
+          {
+            label: "Archive",
+            icon: "archive-outline",
+            color: Colors.secondary,
+            onPress: () => setArchived({ id: item.id, archived: true }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
+      >
+        <Touchable onPress={() => router.push(`/link/${item.id}`)}>
+          <LinkCard
+            item={{
+              id: item.id,
+              title: item.title ?? "Untitled",
+              source: item.site_name ?? item.url,
+              domain: item.url,
+              savedAt: timeAgo(item.created_at),
+              preview: item.thumbnail_url ? "rich" : "fallback",
+              thumb: item.thumbnail_url ?? undefined,
+              note: item.note ?? undefined,
+              reminder: reminders[item.id]
+                ? formatReminderShort(reminders[item.id])
+                : undefined,
+              groupName: item.group_id
+                ? groupsMap[item.group_id]?.name
+                : undefined,
+              groupColor: item.group_id
+                ? groupsMap[item.group_id]?.color
+                : undefined,
+            }}
+            variant={viewMode}
+          />
+        </Touchable>
+      </SwipeableRow>
     ),
-    [router, viewMode, groupsMap, reminders]
+    [router, viewMode, groupsMap, reminders, setArchived, deleteLink]
   );
 
   return (
@@ -94,15 +117,26 @@ const HomeScreen = () => {
               Link<Text style={styles.headerTitleAccent}>pond</Text>
             </Text>
           </View>
-          <Touchable
-            onPress={() => setViewMode((v) => (v === "list" ? "card" : "list"))}
-          >
-            <Ionicons
-              name={viewMode === "list" ? "grid-outline" : "list-outline"}
-              size={22}
-              color={Colors.primary}
-            />
-          </Touchable>
+          <View style={styles.headerActions}>
+            <Touchable onPress={() => router.push("/archived")}>
+              <Ionicons
+                name="archive-outline"
+                size={22}
+                color={Colors.primary}
+              />
+            </Touchable>
+            <Touchable
+              onPress={() =>
+                setViewMode((v) => (v === "list" ? "card" : "list"))
+              }
+            >
+              <Ionicons
+                name={viewMode === "list" ? "grid-outline" : "list-outline"}
+                size={22}
+                color={Colors.primary}
+              />
+            </Touchable>
+          </View>
         </View>
         {groups.length > 0 && (
           <ScrollView
@@ -247,6 +281,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.gap.small,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.large,
   },
   logoIcon: {
     width: 24,

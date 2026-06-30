@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteLink,
   getAllLinks,
+  getArchivedLinks,
   getLinkById,
   getLinkCountsByGroup,
   insertLink,
   markLinkOpened,
+  setLinkArchived,
   updateLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
@@ -98,6 +100,29 @@ export const useUpdateLink = () => {
   });
 };
 
+export const useArchivedLinks = () =>
+  useQuery({
+    queryKey: ["archivedLinks"],
+    queryFn: getArchivedLinks,
+  });
+
+export const useSetArchived = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
+      setLinkArchived(id, archived),
+    onSuccess: (_data, { archived }) => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedLinks"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
+      queryClient.invalidateQueries({ queryKey: ["link"] });
+      toast(archived ? "Link archived" : "Link restored");
+    },
+  });
+};
+
 export const useMarkOpened = () => {
   const queryClient = useQueryClient();
 
@@ -110,17 +135,18 @@ export const useMarkOpened = () => {
   });
 };
 
-export const useDeleteLink = () => {
+export const useDeleteLink = (options?: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const toast = useToast();
 
   return useMutation({
     mutationFn: (id: string) => deleteLink(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
-      router.back();
+      queryClient.invalidateQueries({ queryKey: ["archivedLinks"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
       toast("Link deleted");
+      options?.onSuccess?.();
     },
   });
 };

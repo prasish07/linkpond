@@ -12,8 +12,14 @@ import { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
-import { useLinks } from "@/features/links/hooks/useLinksHooks";
+import {
+  useDeleteLink,
+  useLinks,
+  useSetArchived,
+} from "@/features/links/hooks/useLinksHooks";
 import { LinkCard } from "@/features/links/components/LinkCard";
+import { SwipeableRow } from "@/components/SwipeableRow";
+import { confirmDeleteLink } from "@/features/links/confirmDelete";
 import { Link } from "@/features/links/types";
 import { useRouter } from "expo-router";
 import useDebounce from "@/lib/useDebounce";
@@ -45,6 +51,8 @@ const SearchScreen = () => {
   const { data: reminders = {} } = useActiveReminders();
   const { data: recentSearches = [] } = useRecentSearches();
   const { mutate: recordSearch } = useRecordSearch();
+  const { mutate: setArchived } = useSetArchived();
+  const { mutate: deleteLink } = useDeleteLink();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
 
   const sortedLinks = sort === "oldest" ? [...links].reverse() : links;
@@ -59,31 +67,48 @@ const SearchScreen = () => {
 
   const renderLink = useCallback(
     ({ item }: { item: Link }) => (
-      <Touchable onPress={() => router.push(`/link/${item.id}`)}>
-        <LinkCard
-          item={{
-            id: item.id,
-            title: item.title ?? "Untitled",
-            source: item.site_name ?? item.url,
-            domain: item.url,
-            savedAt: timeAgo(item.created_at),
-            preview: item.thumbnail_url ? "rich" : "fallback",
-            thumb: item.thumbnail_url ?? undefined,
-            note: item.note ?? undefined,
-            reminder: reminders[item.id]
-              ? formatReminderShort(reminders[item.id])
-              : undefined,
-            groupName: item.group_id
-              ? groupsMap[item.group_id]?.name
-              : undefined,
-            groupColor: item.group_id
-              ? groupsMap[item.group_id]?.color
-              : undefined,
-          }}
-        />
-      </Touchable>
+      <SwipeableRow
+        actions={[
+          {
+            label: "Archive",
+            icon: "archive-outline",
+            color: Colors.secondary,
+            onPress: () => setArchived({ id: item.id, archived: true }),
+          },
+          {
+            label: "Delete",
+            icon: "trash-outline",
+            color: Colors.destructive,
+            onPress: () => confirmDeleteLink(() => deleteLink(item.id)),
+          },
+        ]}
+      >
+        <Touchable onPress={() => router.push(`/link/${item.id}`)}>
+          <LinkCard
+            item={{
+              id: item.id,
+              title: item.title ?? "Untitled",
+              source: item.site_name ?? item.url,
+              domain: item.url,
+              savedAt: timeAgo(item.created_at),
+              preview: item.thumbnail_url ? "rich" : "fallback",
+              thumb: item.thumbnail_url ?? undefined,
+              note: item.note ?? undefined,
+              reminder: reminders[item.id]
+                ? formatReminderShort(reminders[item.id])
+                : undefined,
+              groupName: item.group_id
+                ? groupsMap[item.group_id]?.name
+                : undefined,
+              groupColor: item.group_id
+                ? groupsMap[item.group_id]?.color
+                : undefined,
+            }}
+          />
+        </Touchable>
+      </SwipeableRow>
     ),
-    [router, groupsMap, reminders]
+    [router, groupsMap, reminders, setArchived, deleteLink]
   );
 
   return (

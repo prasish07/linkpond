@@ -24,6 +24,7 @@ import {
   useDeleteLink,
   useLinkById,
   useMarkOpened,
+  useSetArchived,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { getBrandInfo } from "@/lib/getBrandInfo";
@@ -38,11 +39,14 @@ import { PRESETS, formatReminderDate } from "@/features/reminders/utils";
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: link, isLoading, refetch } = useLinkById(id);
-  const { mutate: deleteLink } = useDeleteLink();
+  const router = useRouter();
+  const { mutate: deleteLink } = useDeleteLink({
+    onSuccess: () => router.back(),
+  });
   const { mutate: markOpened } = useMarkOpened();
+  const { mutate: setArchived } = useSetArchived();
   const { data: groups = [] } = useGroups();
   const navigation = useNavigation();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [imgError, setImgError] = useState(false);
@@ -75,6 +79,19 @@ export default function LinkDetailScreen() {
             <Ionicons name="pencil-outline" size={20} color={Colors.primary} />
           </Touchable>
           <Touchable
+            onPress={() => {
+              if (!link?.id) return;
+              setArchived({ id: link.id, archived: !link.is_archived });
+              router.back();
+            }}
+          >
+            <Ionicons
+              name={link?.is_archived ? "archive" : "archive-outline"}
+              size={20}
+              color={Colors.primary}
+            />
+          </Touchable>
+          <Touchable
             onPress={() =>
               Alert.alert("Delete link?", "This can't be undone.", [
                 { text: "Cancel", style: "cancel" },
@@ -97,7 +114,7 @@ export default function LinkDetailScreen() {
         </View>
       ),
     });
-  }, [navigation, link, deleteLink, router]);
+  }, [navigation, link, deleteLink, setArchived, router]);
 
   if (isLoading) {
     return (
