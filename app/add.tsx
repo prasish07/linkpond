@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
-import { useAddLink, useLinkByUrl } from "@/features/links/hooks/useLinksHooks";
+import { useAddLink, useLinks } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { timeAgo } from "@/lib/timeAgo";
+import { canonicalizeUrl } from "@/lib/canonicalizeUrl";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
@@ -74,9 +75,15 @@ export default function AddScreen() {
 
   const isSettled = url.trim() === trimmedUrl; // has the debounce caught up to what I typed?
 
-  // duplicate detection: do we already have this exact URL?
-  const { data: existing } = useLinkByUrl(normalizedUrl);
-  const duplicate = isSettled && existing ? existing : null;
+  // duplicate detection: compare canonical forms against the (fresh) link list,
+  // so trivial URL variants (www, trailing slash, tracking params) still match.
+  const { data: allLinks = [] } = useLinks();
+  const canonicalTarget = canonicalizeUrl(normalizedUrl);
+  const duplicate =
+    isSettled && canonicalTarget
+      ? (allLinks.find((l) => canonicalizeUrl(l.url) === canonicalTarget) ??
+        null)
+      : null;
 
   const openExisting = () => {
     if (duplicate) router.replace(`/link/${duplicate.id}`);
