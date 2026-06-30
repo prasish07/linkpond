@@ -4,6 +4,7 @@ import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { useAddLink, useLinks } from "@/features/links/hooks/useLinksHooks";
+import { TagPicker } from "@/components/TagPicker";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
 import { timeAgo } from "@/lib/timeAgo";
 import { canonicalizeUrl } from "@/lib/canonicalizeUrl";
@@ -58,6 +59,7 @@ export default function AddScreen() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const debouncedUrl = useDebounce(url, 500);
   const trimmedUrl = debouncedUrl.trim();
   const normalizedUrl = trimmedUrl
@@ -134,6 +136,7 @@ export default function AddScreen() {
       title: previewTitle,
       note: note.trim(),
       group_id: selectedGroupId,
+      tagIds: selectedTagIds,
     });
   };
 
@@ -390,6 +393,15 @@ export default function AddScreen() {
                   </ScrollView>
                 </>
               )}
+              <View style={styles.sectionLabelRow}>
+                <Ionicons
+                  name="pricetag-outline"
+                  size={SECTION_ICON_SIZE}
+                  color={Colors.secondary}
+                />
+                <Text style={styles.label}>TAGS</Text>
+              </View>
+              <TagPicker selectedIds={selectedTagIds} onChange={setSelectedTagIds} />
             </>
           )}
 

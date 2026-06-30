@@ -11,6 +11,7 @@ import {
   updateLink,
   updateLinkPreview,
 } from "@/features/links/data/links.repo";
+import { setTagsForLink } from "@/features/tags/data/tags.repo";
 import { useRouter } from "expo-router";
 import { fetchPreview } from "@/lib/fetchPreview";
 import { useToast } from "@/components/Toast";
@@ -20,12 +21,13 @@ type AddLinkFields = {
   title: string;
   note: string;
   group_id?: string;
+  tagIds?: string[];
 };
 
-export const useLinks = (groupId?: string, search?: string) =>
+export const useLinks = (groupId?: string, search?: string, tagId?: string) =>
   useQuery({
-    queryKey: ["links", groupId, search],
-    queryFn: () => getAllLinks(groupId, search),
+    queryKey: ["links", groupId, search, tagId],
+    queryFn: () => getAllLinks(groupId, search, tagId),
   });
 
 export const useGroupLinkCounts = () =>
@@ -61,9 +63,11 @@ export const useAddLink = (options?: { onSuccess?: () => void }) => {
       });
       const preview = await fetchPreview(fields.url);
       await updateLinkPreview(id, preview);
+      if (fields.tagIds?.length) await setTagsForLink(id, fields.tagIds);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
+      queryClient.invalidateQueries({ queryKey: ["linkTagsMap"] });
       options?.onSuccess ? options.onSuccess() : router.back();
       toast("Link saved");
     },
@@ -80,16 +84,24 @@ export const useUpdateLink = () => {
   const toast = useToast();
 
   return useMutation({
-    mutationFn: (fields: {
+    mutationFn: async (fields: {
       id: string;
       title: string;
       note: string;
       group_id?: string;
-    }) => updateLink(fields),
+      tagIds?: string[];
+    }) => {
+      await updateLink(fields);
+      if (fields.tagIds !== undefined) {
+        await setTagsForLink(fields.id, fields.tagIds);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
       queryClient.invalidateQueries({ queryKey: ["link"] });
       queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
+      queryClient.invalidateQueries({ queryKey: ["linkTagsMap"] });
+      queryClient.invalidateQueries({ queryKey: ["tagsForLink"] });
       router.back();
       toast("Link updated");
     },

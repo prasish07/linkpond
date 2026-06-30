@@ -4,26 +4,37 @@ import { LinkPreview } from "@/lib/fetchPreview";
 
 export const getAllLinks = async (
   groupId?: string,
-  search?: string
+  search?: string,
+  tagId?: string
 ): Promise<Link[]> => {
-  const conditions: string[] = ["is_archived = 0"];
+  const conditions: string[] = ["l.is_archived = 0"];
   const params: (string | number)[] = [];
 
   if (groupId) {
-    conditions.push("group_id = ?");
+    conditions.push("l.group_id = ?");
     params.push(groupId);
   }
 
   if (search) {
     const like = `%${search}%`;
-    conditions.push(`(title LIKE ? OR note LIKE ? OR url like ?)`);
+    conditions.push(`(l.title LIKE ? OR l.note LIKE ? OR l.url LIKE ?)`);
     params.push(like, like, like);
   }
 
   const where = conditions.join(" AND ");
 
+  if (tagId) {
+    return db.getAllAsync<Link>(
+      `SELECT l.* FROM links l
+       JOIN link_tags lt ON lt.link_id = l.id
+       WHERE ${where} AND lt.tag_id = ?
+       ORDER BY l.created_at DESC`,
+      [...params, tagId]
+    );
+  }
+
   return db.getAllAsync<Link>(
-    `SELECT * FROM links where ${where} ORDER BY created_at DESC`,
+    `SELECT * FROM links l WHERE ${where} ORDER BY l.created_at DESC`,
     params
   );
 };

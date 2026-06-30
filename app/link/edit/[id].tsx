@@ -13,6 +13,8 @@ import {
   useUpdateLink,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { useTagsForLink } from "@/features/tags/hooks/useTagsHooks";
+import { TagPicker } from "@/components/TagPicker";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
@@ -34,6 +36,7 @@ export default function EditLinkScreen() {
 
   const { data: link } = useLinkById(id);
   const { data: groups = [] } = useGroups();
+  const { data: existingTags = [] } = useTagsForLink(id ?? "");
   const { mutate: updateLink, isPending } = useUpdateLink();
 
   const [title, setTitle] = useState("");
@@ -41,6 +44,7 @@ export default function EditLinkScreen() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   // prefill once when the link is available in the cache
   const didPrefill = useRef(false);
@@ -53,6 +57,15 @@ export default function EditLinkScreen() {
     }
   }, [link]);
 
+  // prefill tags separately (different query, may resolve slightly later)
+  const didPrefillTags = useRef(false);
+  useEffect(() => {
+    if (existingTags.length > 0 && !didPrefillTags.current) {
+      setSelectedTagIds(existingTags.map((t) => t.id));
+      didPrefillTags.current = true;
+    }
+  }, [existingTags]);
+
   const handleClose = () => sheetRef.current?.close();
 
   const handleSave = () => {
@@ -62,6 +75,7 @@ export default function EditLinkScreen() {
       title: title.trim(),
       note: note.trim(),
       group_id: selectedGroupId,
+      tagIds: selectedTagIds,
     });
   };
 
@@ -205,6 +219,16 @@ export default function EditLinkScreen() {
               </ScrollView>
             </>
           )}
+
+          <View style={styles.sectionLabelRow}>
+            <Ionicons
+              name="pricetag-outline"
+              size={SECTION_ICON_SIZE}
+              color={Colors.secondary}
+            />
+            <Text style={styles.label}>TAGS</Text>
+          </View>
+          <TagPicker selectedIds={selectedTagIds} onChange={setSelectedTagIds} />
 
           <View style={styles.footer}>
             <Touchable style={styles.cancelBtn} onPress={handleClose}>

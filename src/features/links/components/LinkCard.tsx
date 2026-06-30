@@ -5,6 +5,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { getBrandInfo } from "@/lib/getBrandInfo";
 import { useState } from "react";
+import { TagChips } from "@/components/TagChips";
+import { Tag } from "@/features/tags/types";
 
 type LinkItem = {
   id: string;
@@ -19,6 +21,7 @@ type LinkItem = {
   reminder?: string;
   groupName?: string;
   groupColor?: string;
+  tags?: Tag[];
 };
 
 type Props = {
@@ -111,6 +114,7 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
               </View>
             )}
           </View>
+          {!!item.tags?.length && <TagChips tags={item.tags} />}
         </View>
       </View>
     );
@@ -146,6 +150,7 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
           {item.source}
         </Text>
         {metaLine}
+        {!!item.tags?.length && <TagChips tags={item.tags} maxVisible={2} />}
       </View>
 
       {item.reminder && (
