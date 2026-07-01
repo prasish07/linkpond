@@ -219,14 +219,10 @@ export default function EditLinkScreen() {
                     ]}
                     onPress={() => setSelectedGroupId(g.id)}
                   >
-                    <View
-                      style={[
-                        styles.groupDot,
-                        {
-                          backgroundColor:
-                            selectedGroupId === g.id ? Colors.body : g.color,
-                        },
-                      ]}
+                    <Ionicons
+                      name={g.icon as keyof typeof Ionicons.glyphMap}
+                      size={14}
+                      color={selectedGroupId === g.id ? Colors.body : g.color}
                     />
                     <Text
                       style={[
