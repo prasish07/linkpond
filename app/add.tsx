@@ -10,9 +10,14 @@ import { timeAgo } from "@/lib/timeAgo";
 import { canonicalizeUrl } from "@/lib/canonicalizeUrl";
 import BottomSheet, {
   BottomSheetScrollView,
+  BottomSheetScrollViewMethods,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { ScrollView } from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { fetchPreview, LinkPreview } from "@/lib/fetchPreview";
 import useDebounce from "@/lib/useDebounce";
 import { useQuery } from "@tanstack/react-query";
@@ -38,12 +43,27 @@ type PreviewState =
 const PREVIEW_THUMB_SIZE = 72;
 const SKELETON_LINE_HEIGHT = 10;
 const SNAP_IDLE = "35%";
-const SNAP_ACTIVE = "70%";
+const SNAP_ACTIVE = "85%";
 const SNAP_TALL = "90%";
 
 export default function AddScreen() {
   const router = useRouter();
   const sheetRef = useRef<BottomSheet>(null);
+  const scrollRef = useRef<BottomSheetScrollViewMethods>(null);
+
+  // Android edge-to-edge breaks adjustResize, so the sheet's ScrollView never
+  // shrinks above the keyboard. Track the real keyboard height with Reanimated
+  // and add a matching spacer so lower fields can scroll into view.
+  const keyboard = useAnimatedKeyboard({
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+  const keyboardSpacer = useAnimatedStyle(() => ({
+    height: keyboard.height.value,
+  }));
+
+  const scrollToInput = () =>
+    scrollRef.current?.scrollToEnd({ animated: true });
   const { mutate: addLink, isPending } = useAddLink({
     onSuccess: () => {
       if (initialUrl) finishActivity();
@@ -149,12 +169,14 @@ export default function AddScreen() {
         keyboardBehavior="extend" // keyboard opens → jump to90% (above keyboard)
         keyboardBlurBehavior="restore" // keyboard closes → back to 50%
         android_keyboardInputMode="adjustResize"
+        enableContentPanningGesture={false}
         enablePanDownToClose
         onClose={() => router.back()}
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.handle}
       >
         <BottomSheetScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
@@ -205,7 +227,9 @@ export default function AddScreen() {
               onPress={openExisting}
             >
               <Ionicons
-                name={duplicate.opened_at ? "information-circle" : "alert-circle"}
+                name={
+                  duplicate.opened_at ? "information-circle" : "alert-circle"
+                }
                 size={18}
                 color={duplicate.opened_at ? Colors.secondary : Colors.gold}
               />
@@ -401,7 +425,11 @@ export default function AddScreen() {
                 />
                 <Text style={styles.label}>TAGS</Text>
               </View>
-              <TagPicker selectedIds={selectedTagIds} onChange={setSelectedTagIds} />
+              <TagPicker
+                selectedIds={selectedTagIds}
+                onChange={setSelectedTagIds}
+                onInputFocus={scrollToInput}
+              />
             </>
           )}
 
@@ -428,6 +456,7 @@ export default function AddScreen() {
               )}
             </Touchable>
           </View>
+          <Animated.View style={keyboardSpacer} />
         </BottomSheetScrollView>
       </BottomSheet>
     </View>

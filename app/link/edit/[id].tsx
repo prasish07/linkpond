@@ -17,8 +17,13 @@ import { useTagsForLink } from "@/features/tags/hooks/useTagsHooks";
 import { TagPicker } from "@/components/TagPicker";
 import BottomSheet, {
   BottomSheetScrollView,
+  BottomSheetScrollViewMethods,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 const CLOSE_ICON_SIZE = 22;
@@ -32,7 +37,22 @@ const SNAP_POINTS = ["75%"];
 export default function EditLinkScreen() {
   const router = useRouter();
   const sheetRef = useRef<BottomSheet>(null);
+  const scrollRef = useRef<BottomSheetScrollViewMethods>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Android edge-to-edge breaks adjustResize, so the sheet's ScrollView never
+  // shrinks above the keyboard. Track the real keyboard height with Reanimated
+  // and add a matching spacer so lower fields can scroll into view.
+  const keyboard = useAnimatedKeyboard({
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+  const keyboardSpacer = useAnimatedStyle(() => ({
+    height: keyboard.height.value,
+  }));
+
+  const scrollToInput = () =>
+    scrollRef.current?.scrollToEnd({ animated: true });
 
   const { data: link } = useLinkById(id);
   const { data: groups = [] } = useGroups();
@@ -88,12 +108,14 @@ export default function EditLinkScreen() {
         keyboardBehavior="extend"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
+        enableContentPanningGesture={false}
         enablePanDownToClose
         onClose={() => router.back()}
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.handle}
       >
         <BottomSheetScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
@@ -228,7 +250,11 @@ export default function EditLinkScreen() {
             />
             <Text style={styles.label}>TAGS</Text>
           </View>
-          <TagPicker selectedIds={selectedTagIds} onChange={setSelectedTagIds} />
+          <TagPicker
+            selectedIds={selectedTagIds}
+            onChange={setSelectedTagIds}
+            onInputFocus={scrollToInput}
+          />
 
           <View style={styles.footer}>
             <Touchable style={styles.cancelBtn} onPress={handleClose}>
@@ -244,6 +270,7 @@ export default function EditLinkScreen() {
               </Text>
             </Touchable>
           </View>
+          <Animated.View style={keyboardSpacer} />
         </BottomSheetScrollView>
       </BottomSheet>
     </View>

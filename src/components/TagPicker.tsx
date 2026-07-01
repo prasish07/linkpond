@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
@@ -11,9 +12,10 @@ const CHIP_HEIGHT = 30;
 type Props = {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
+  onInputFocus?: () => void;
 };
 
-export const TagPicker = ({ selectedIds, onChange }: Props) => {
+export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
   const { data: tags = [] } = useTags();
   const { mutateAsync: addTag } = useAddTag();
   const [creating, setCreating] = useState(false);
@@ -66,8 +68,9 @@ export const TagPicker = ({ selectedIds, onChange }: Props) => {
         })}
         {creating ? (
           <View style={styles.inputRow}>
-            <TextInput
+            <BottomSheetTextInput
               autoFocus
+              onFocus={onInputFocus}
               value={newName}
               onChangeText={setNewName}
               placeholder="tag name"
