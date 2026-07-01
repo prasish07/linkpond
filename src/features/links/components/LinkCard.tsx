@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { getBrandInfo } from "@/lib/getBrandInfo";
 import { useState } from "react";
-import { TagChips } from "@/components/TagChips";
+import { TagList } from "@/components/TagList";
 import { Tag } from "@/features/tags/types";
 
 type LinkItem = {
@@ -62,6 +62,12 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
         </>
       )}
       <Text style={styles.meta}>{item.savedAt}</Text>
+      {!!item.tags?.length && (
+        <>
+          <Ionicons name="ellipse" size={3} color={Colors.tertiary} />
+          <TagList tags={item.tags} maxVisible={2} />
+        </>
+      )}
     </View>
   );
 
@@ -114,7 +120,6 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
               </View>
             )}
           </View>
-          {!!item.tags?.length && <TagChips tags={item.tags} />}
         </View>
       </View>
     );
@@ -162,7 +167,6 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
           />
         )}
       </View>
-      {!!item.tags?.length && <TagChips tags={item.tags} maxVisible={3} />}
     </View>
   );
 };
@@ -278,6 +282,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     gap: Spacing.gap.xs,
+    overflow: "hidden",
   },
   title: {
     fontSize: Typography.fontSize.medium,
@@ -299,6 +304,7 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: Spacing.gap.xs,
     flexShrink: 1,
   },
