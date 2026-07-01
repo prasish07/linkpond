@@ -88,6 +88,9 @@ const runMigrations = async (): Promise<void> => {
   if (!(await columnExists("links", "opened_at"))) {
     await db.execAsync(`ALTER TABLE links ADD COLUMN opened_at INTEGER`);
   }
+  if (!(await columnExists("tags", "color"))) {
+    await db.execAsync(`ALTER TABLE tags ADD COLUMN color TEXT NOT NULL DEFAULT '#7B9EA8'`);
+  }
 };
 
 export default db;

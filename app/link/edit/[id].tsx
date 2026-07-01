@@ -13,10 +13,17 @@ import {
   useUpdateLink,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { useTagsForLink } from "@/features/tags/hooks/useTagsHooks";
+import { TagPicker } from "@/components/TagPicker";
 import BottomSheet, {
   BottomSheetScrollView,
+  BottomSheetScrollViewMethods,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 const CLOSE_ICON_SIZE = 22;
@@ -30,10 +37,26 @@ const SNAP_POINTS = ["75%"];
 export default function EditLinkScreen() {
   const router = useRouter();
   const sheetRef = useRef<BottomSheet>(null);
+  const scrollRef = useRef<BottomSheetScrollViewMethods>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Android edge-to-edge breaks adjustResize, so the sheet's ScrollView never
+  // shrinks above the keyboard. Track the real keyboard height with Reanimated
+  // and add a matching spacer so lower fields can scroll into view.
+  const keyboard = useAnimatedKeyboard({
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+  const keyboardSpacer = useAnimatedStyle(() => ({
+    height: keyboard.height.value,
+  }));
+
+  const scrollToInput = () =>
+    scrollRef.current?.scrollToEnd({ animated: true });
 
   const { data: link } = useLinkById(id);
   const { data: groups = [] } = useGroups();
+  const { data: existingTags = [] } = useTagsForLink(id ?? "");
   const { mutate: updateLink, isPending } = useUpdateLink();
 
   const [title, setTitle] = useState("");
@@ -41,6 +64,7 @@ export default function EditLinkScreen() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   // prefill once when the link is available in the cache
   const didPrefill = useRef(false);
@@ -53,6 +77,15 @@ export default function EditLinkScreen() {
     }
   }, [link]);
 
+  // prefill tags separately (different query, may resolve slightly later)
+  const didPrefillTags = useRef(false);
+  useEffect(() => {
+    if (existingTags.length > 0 && !didPrefillTags.current) {
+      setSelectedTagIds(existingTags.map((t) => t.id));
+      didPrefillTags.current = true;
+    }
+  }, [existingTags]);
+
   const handleClose = () => sheetRef.current?.close();
 
   const handleSave = () => {
@@ -62,6 +95,7 @@ export default function EditLinkScreen() {
       title: title.trim(),
       note: note.trim(),
       group_id: selectedGroupId,
+      tagIds: selectedTagIds,
     });
   };
 
@@ -74,12 +108,14 @@ export default function EditLinkScreen() {
         keyboardBehavior="extend"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
+        enableContentPanningGesture={false}
         enablePanDownToClose
         onClose={() => router.back()}
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.handle}
       >
         <BottomSheetScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
@@ -206,6 +242,20 @@ export default function EditLinkScreen() {
             </>
           )}
 
+          <View style={styles.sectionLabelRow}>
+            <Ionicons
+              name="pricetag-outline"
+              size={SECTION_ICON_SIZE}
+              color={Colors.secondary}
+            />
+            <Text style={styles.label}>TAGS</Text>
+          </View>
+          <TagPicker
+            selectedIds={selectedTagIds}
+            onChange={setSelectedTagIds}
+            onInputFocus={scrollToInput}
+          />
+
           <View style={styles.footer}>
             <Touchable style={styles.cancelBtn} onPress={handleClose}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -220,6 +270,7 @@ export default function EditLinkScreen() {
               </Text>
             </Touchable>
           </View>
+          <Animated.View style={keyboardSpacer} />
         </BottomSheetScrollView>
       </BottomSheet>
     </View>

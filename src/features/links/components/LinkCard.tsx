@@ -5,6 +5,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { getBrandInfo } from "@/lib/getBrandInfo";
 import { useState } from "react";
+import { TagList } from "@/components/TagList";
+import { Tag } from "@/features/tags/types";
 
 type LinkItem = {
   id: string;
@@ -19,6 +21,7 @@ type LinkItem = {
   reminder?: string;
   groupName?: string;
   groupColor?: string;
+  tags?: Tag[];
 };
 
 type Props = {
@@ -59,6 +62,12 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
         </>
       )}
       <Text style={styles.meta}>{item.savedAt}</Text>
+      {!!item.tags?.length && (
+        <>
+          <Ionicons name="ellipse" size={3} color={Colors.tertiary} />
+          <TagList tags={item.tags} maxVisible={2} />
+        </>
+      )}
     </View>
   );
 
@@ -118,44 +127,46 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
 
   return (
     <View style={[styles.listContainer, dimmed && styles.dimmed]}>
-      <View style={styles.listThumbWrap}>
-        {!showFallback ? (
-          <Image
-            source={{ uri: item.thumb }}
-            style={styles.listThumb}
-            contentFit="cover"
-            onError={() => setImgError(true)}
+      <View style={styles.listRow}>
+        <View style={styles.listThumbWrap}>
+          {!showFallback ? (
+            <Image
+              source={{ uri: item.thumb }}
+              style={styles.listThumb}
+              contentFit="cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <View style={[styles.listThumb, styles.thumbFallback]}>
+              {getFallbackIcon(item.domain, 32)}
+            </View>
+          )}
+          {item.duration && (
+            <View style={styles.durationBadge}>
+              <Text style={styles.durationText}>{item.duration}</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.content}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.source} numberOfLines={1}>
+            {item.source}
+          </Text>
+          {metaLine}
+        </View>
+
+        {item.reminder && (
+          <Ionicons
+            name="notifications-outline"
+            size={16}
+            color={Colors.gold}
+            style={styles.listReminder}
           />
-        ) : (
-          <View style={[styles.listThumb, styles.thumbFallback]}>
-            {getFallbackIcon(item.domain, 32)}
-          </View>
-        )}
-        {item.duration && (
-          <View style={styles.durationBadge}>
-            <Text style={styles.durationText}>{item.duration}</Text>
-          </View>
         )}
       </View>
-
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.source} numberOfLines={1}>
-          {item.source}
-        </Text>
-        {metaLine}
-      </View>
-
-      {item.reminder && (
-        <Ionicons
-          name="notifications-outline"
-          size={16}
-          color={Colors.gold}
-          style={styles.listReminder}
-        />
-      )}
     </View>
   );
 };
@@ -163,12 +174,15 @@ export const LinkCard = ({ item, variant, dimmed }: Props) => {
 const styles = StyleSheet.create({
   // list variant
   listContainer: {
-    flexDirection: "row",
     backgroundColor: Colors.card,
     borderRadius: Spacing.radius.medium,
     padding: Spacing.padding.medium,
-    gap: Spacing.gap.medium,
+    gap: Spacing.gap.small,
+  },
+  listRow: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.gap.medium,
   },
   listThumbWrap: {
     width: 80,
@@ -235,7 +249,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: Spacing.padding.small,
     right: Spacing.padding.small,
-    backgroundColor: "rgba(0,0,0,0.75)",
+    backgroundColor: Colors.overlay,
     borderRadius: Spacing.radius.xs,
     paddingHorizontal: Spacing.padding.xs,
     paddingVertical: 1,
@@ -268,6 +282,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     gap: Spacing.gap.xs,
+    overflow: "hidden",
   },
   title: {
     fontSize: Typography.fontSize.medium,
@@ -289,6 +304,7 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: Spacing.gap.xs,
     flexShrink: 1,
   },

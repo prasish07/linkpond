@@ -10,6 +10,7 @@ export const Colors = {
   tertiary: "#746F65",
   confirm: "#9DBE8E",
   scrim: "rgba(0,0,0,0.5)",
+  overlay: "rgba(0,0,0,0.75)",
   shadow: "#000000",
   ripple: "rgba(255,255,255,0.12)",
   toastBg: "#3A4435",

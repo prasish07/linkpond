@@ -23,6 +23,7 @@ import { useClipboardDetect } from "@/lib/useClipboardDetect";
 import { ClipboardBanner } from "@/features/links/components/ClipboardBanner";
 import { useActiveReminders } from "@/features/reminders/hooks/useRemindersHooks";
 import { formatReminderShort } from "@/features/reminders/utils";
+import { useTags, useAllLinkTagsMap } from "@/features/tags/hooks/useTagsHooks";
 
 const CHIP_HEIGHT = 26;
 
@@ -30,16 +31,21 @@ const HomeScreen = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
     undefined
   );
+  const [selectedTagId, setSelectedTagId] = useState<string | undefined>(
+    undefined
+  );
   const [viewMode, setViewMode] = useState<"card" | "list">("list");
   const [sort, setSort] = useState<"recent" | "oldest">("recent");
 
-  const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId);
+  const { data: links = [], isLoading, refetch } = useLinks(selectedGroupId, undefined, selectedTagId);
   const { data: allLinks = [] } = useLinks(undefined, undefined);
   const { data: groups = [] } = useGroups();
   const groupsMap = Object.fromEntries(groups.map((g) => [g.id, g]));
   const router = useRouter();
   const { data: groupCounts = {} } = useGroupLinkCounts();
   const { data: reminders = {} } = useActiveReminders();
+  const { data: linkTagsMap = {} } = useAllLinkTagsMap();
+  const { data: tags = [] } = useTags();
   const { mutate: setArchived } = useSetArchived();
   const { mutate: deleteLink } = useDeleteLink();
   const { clipboardUrl, dismiss } = useClipboardDetect();
@@ -96,6 +102,7 @@ const HomeScreen = () => {
               groupColor: item.group_id
                 ? groupsMap[item.group_id]?.color
                 : undefined,
+              tags: linkTagsMap[item.id] ?? [],
             }}
             variant={viewMode}
             dimmed={item.opened_at != null}
@@ -103,7 +110,7 @@ const HomeScreen = () => {
         </Touchable>
       </SwipeableRow>
     ),
-    [router, viewMode, groupsMap, reminders, setArchived, deleteLink]
+    [router, viewMode, groupsMap, reminders, linkTagsMap, setArchived, deleteLink]
   );
 
   return (
@@ -207,6 +214,46 @@ const HomeScreen = () => {
                   ]}
                 >
                   {groupCounts[g.id] ?? 0}
+                </Text>
+              </Touchable>
+            ))}
+          </ScrollView>
+        )}
+        {tags.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContent}
+            style={styles.filter}
+          >
+            {tags.map((tag) => (
+              <Touchable
+                key={tag.id}
+                style={[
+                  styles.chip,
+                  selectedTagId === tag.id && {
+                    backgroundColor: tag.color,
+                    borderColor: tag.color,
+                  },
+                ]}
+                onPress={() =>
+                  setSelectedTagId((prev) =>
+                    prev === tag.id ? undefined : tag.id
+                  )
+                }
+              >
+                <Ionicons
+                  name="pricetag"
+                  size={12}
+                  color={selectedTagId === tag.id ? Colors.body : tag.color}
+                />
+                <Text
+                  style={[
+                    styles.chipText,
+                    selectedTagId === tag.id && { color: Colors.body },
+                  ]}
+                >
+                  {tag.name}
                 </Text>
               </Touchable>
             ))}
