@@ -4,6 +4,7 @@ import {
   getAllLinkTagsMap,
   getTagsForLink,
   insertTag,
+  updateTag,
   deleteTag,
   setTagsForLink,
 } from "@/features/tags/data/tags.repo";
@@ -36,6 +37,23 @@ export const useAddTag = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast("Tag created");
+    },
+  });
+};
+
+export const useUpdateTag = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (tag: { id: string; name: string }) => updateTag(tag),
+    onSuccess: () => {
+      // the tag name is denormalized into these caches, so a rename must
+      // invalidate all three or cards keep showing the old name.
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      queryClient.invalidateQueries({ queryKey: ["linkTagsMap"] });
+      queryClient.invalidateQueries({ queryKey: ["tagsForLink"] });
+      toast("Tag updated");
     },
   });
 };

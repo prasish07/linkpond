@@ -5,9 +5,17 @@ import { Touchable } from "@/components/Touchable";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, Typography } from "@/theme/theme";
 import { Tag } from "@/features/tags/types";
-import { useTags, useAddTag } from "@/features/tags/hooks/useTagsHooks";
+import {
+  useTags,
+  useAddTag,
+  useUpdateTag,
+  useDeleteTag,
+} from "@/features/tags/hooks/useTagsHooks";
+import { confirmDeleteTag } from "@/features/tags/confirmDeleteTag";
+import { ActionSheet, SheetAction } from "@/components/ActionSheet";
 
 const CHIP_HEIGHT = 30;
+const HIT_SLOP = { top: 10, bottom: 10, left: 10, right: 10 };
 
 type Props = {
   selectedIds: string[];
@@ -18,8 +26,13 @@ type Props = {
 export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
   const { data: tags = [] } = useTags();
   const { mutateAsync: addTag } = useAddTag();
+  const { mutate: updateTag } = useUpdateTag();
+  const { mutate: deleteTag } = useDeleteTag();
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [menuTag, setMenuTag] = useState<Tag | null>(null);
 
   const toggle = (id: string) => {
     onChange(
@@ -36,16 +49,96 @@ export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
       Alert.alert("Tag exists", `A tag named "${name}" already exists.`);
       return;
     }
-    const tag = await addTag(name) as Tag;
+    const tag = (await addTag(name)) as Tag;
     onChange([...selectedIds, tag.id]);
     setNewName("");
     setCreating(false);
+  };
+
+  // long-press a chip → themed action sheet
+  const startRename = (tag: Tag) => {
+    setEditingId(tag.id);
+    setEditName(tag.name);
+  };
+
+  const requestDelete = (tag: Tag) =>
+    confirmDeleteTag(tag.name, () => {
+      deleteTag(tag.id);
+      onChange(selectedIds.filter((id) => id !== tag.id));
+    });
+
+  const menuActions: SheetAction[] = menuTag
+    ? [
+        {
+          label: "Rename",
+          icon: "pencil",
+          onPress: () => startRename(menuTag),
+        },
+        {
+          label: "Delete",
+          icon: "trash-outline",
+          destructive: true,
+          onPress: () => requestDelete(menuTag),
+        },
+      ]
+    : [];
+
+  const cancelRename = () => {
+    setEditingId(null);
+    setEditName("");
+  };
+
+  const handleRename = () => {
+    if (!editingId) return;
+    const name = editName.trim();
+    if (!name) return cancelRename();
+    const clash = tags.some(
+      (t) => t.id !== editingId && t.name.toLowerCase() === name.toLowerCase()
+    );
+    if (clash) {
+      Alert.alert("Tag exists", `A tag named "${name}" already exists.`);
+      return;
+    }
+    updateTag({ id: editingId, name });
+    cancelRename();
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         {tags.map((tag) => {
+          if (editingId === tag.id) {
+            return (
+              <View key={tag.id} style={styles.inputRow}>
+                <BottomSheetTextInput
+                  autoFocus
+                  onFocus={onInputFocus}
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="tag name"
+                  placeholderTextColor={Colors.tertiary}
+                  style={styles.inlineInput}
+                  onSubmitEditing={handleRename}
+                  returnKeyType="done"
+                  autoCapitalize="none"
+                />
+                <Touchable
+                  onPress={handleRename}
+                  style={styles.confirmBtn}
+                  hitSlop={HIT_SLOP}
+                >
+                  <Ionicons name="checkmark" size={14} color={Colors.body} />
+                </Touchable>
+                <Touchable
+                  onPress={cancelRename}
+                  hitSlop={HIT_SLOP}
+                  rippleBorderless
+                >
+                  <Ionicons name="close" size={14} color={Colors.secondary} />
+                </Touchable>
+              </View>
+            );
+          }
           const active = selectedIds.includes(tag.id);
           return (
             <Touchable
@@ -57,9 +150,13 @@ export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
                   : { borderColor: tag.color + "66" },
               ]}
               onPress={() => toggle(tag.id)}
+              onLongPress={() => setMenuTag(tag)}
             >
               <Text
-                style={[styles.chipText, { color: active ? Colors.body : tag.color }]}
+                style={[
+                  styles.chipText,
+                  { color: active ? Colors.body : tag.color },
+                ]}
               >
                 #{tag.name}
               </Text>
@@ -80,10 +177,21 @@ export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
               returnKeyType="done"
               autoCapitalize="none"
             />
-            <Touchable onPress={handleCreate} style={styles.confirmBtn}>
+            <Touchable
+              onPress={handleCreate}
+              style={styles.confirmBtn}
+              hitSlop={HIT_SLOP}
+            >
               <Ionicons name="checkmark" size={14} color={Colors.body} />
             </Touchable>
-            <Touchable onPress={() => { setCreating(false); setNewName(""); }}>
+            <Touchable
+              onPress={() => {
+                setCreating(false);
+                setNewName("");
+              }}
+              hitSlop={HIT_SLOP}
+              rippleBorderless
+            >
               <Ionicons name="close" size={14} color={Colors.secondary} />
             </Touchable>
           </View>
@@ -94,6 +202,13 @@ export const TagPicker = ({ selectedIds, onChange, onInputFocus }: Props) => {
           </Touchable>
         )}
       </View>
+
+      <ActionSheet
+        visible={!!menuTag}
+        title={menuTag ? `#${menuTag.name}` : undefined}
+        actions={menuActions}
+        onClose={() => setMenuTag(null)}
+      />
     </View>
   );
 };

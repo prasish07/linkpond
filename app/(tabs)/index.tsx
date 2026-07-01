@@ -257,6 +257,17 @@ const HomeScreen = () => {
                 </Text>
               </Touchable>
             ))}
+            <Touchable
+              style={styles.chip}
+              onPress={() => router.push("/tags/manage")}
+            >
+              <Ionicons
+                name="options-outline"
+                size={14}
+                color={Colors.secondary}
+              />
+              <Text style={styles.chipText}>Manage</Text>
+            </Touchable>
           </ScrollView>
         )}
       </View>

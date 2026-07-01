@@ -77,6 +77,15 @@ const RootLayout = () => {
                 }}
               />
               <Stack.Screen
+                name="tags/manage"
+                options={{
+                  title: "Manage Tags",
+                  headerStyle: { backgroundColor: Colors.header },
+                  headerTintColor: Colors.primary,
+                  headerShadowVisible: false,
+                }}
+              />
+              <Stack.Screen
                 name="link/edit/[id]"
                 options={{
                   presentation: "transparentModal",

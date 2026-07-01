@@ -12,6 +12,12 @@ export const insertTag = async (tag: Tag): Promise<void> => {
   );
 };
 
+export const updateTag = async (
+  tag: Pick<Tag, "id" | "name">
+): Promise<void> => {
+  await db.runAsync(`UPDATE tags SET name = ? WHERE id = ?`, [tag.name, tag.id]);
+};
+
 export const deleteTag = async (id: string): Promise<void> => {
   await db.runAsync("DELETE FROM tags WHERE id = ?", [id]);
 };
