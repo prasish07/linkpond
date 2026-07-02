@@ -68,6 +68,7 @@ export const useAddLink = (options?: { onSuccess?: () => void }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"] });
       queryClient.invalidateQueries({ queryKey: ["linkTagsMap"] });
+      queryClient.invalidateQueries({ queryKey: ["linkCountsByGroup"] });
       options?.onSuccess ? options.onSuccess() : router.back();
       toast("Link saved");
     },

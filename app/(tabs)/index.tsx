@@ -230,11 +230,10 @@ const HomeScreen = () => {
               <Touchable
                 key={tag.id}
                 style={[
-                  styles.chip,
-                  selectedTagId === tag.id && {
-                    backgroundColor: tag.color,
-                    borderColor: tag.color,
-                  },
+                  styles.tagChip,
+                  { backgroundColor: tag.color },
+                  selectedTagId && selectedTagId !== tag.id && styles.tagChipDimmed,
+                  selectedTagId === tag.id && styles.tagChipSelected,
                 ]}
                 onPress={() =>
                   setSelectedTagId((prev) =>
@@ -242,19 +241,7 @@ const HomeScreen = () => {
                   )
                 }
               >
-                <Ionicons
-                  name="pricetag"
-                  size={12}
-                  color={selectedTagId === tag.id ? Colors.body : tag.color}
-                />
-                <Text
-                  style={[
-                    styles.chipText,
-                    selectedTagId === tag.id && { color: Colors.body },
-                  ]}
-                >
-                  {tag.name}
-                </Text>
+                <Text style={styles.tagChipText}>{tag.name}</Text>
               </Touchable>
             ))}
             <Touchable
@@ -455,6 +442,27 @@ const styles = StyleSheet.create({
   chipCount: {
     color: Colors.secondary,
     fontSize: Typography.fontSize.small,
+  },
+  tagChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.padding.medium,
+    borderRadius: Spacing.radius.xlarge,
+    height: CHIP_HEIGHT,
+  },
+  tagChipDimmed: {
+    opacity: 0.4,
+  },
+  tagChipSelected: {
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  tagChipText: {
+    color: Colors.body,
+    fontSize: Typography.fontSize.small,
+    lineHeight: Typography.fontLineHeight.small,
+    fontWeight: "600",
   },
   metaRow: {
     flexDirection: "row",
