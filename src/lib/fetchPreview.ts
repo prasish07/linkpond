@@ -19,6 +19,24 @@ const decodeHtmlEntities = (str: string): string =>
     .replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, " ");
 
+const MAX_TITLE_LENGTH = 120;
+
+// Facebook (and similar) stuff engagement stats into og:title, e.g.
+// "222 reactions · 19 shares | Stop wasting Claude tokens…". Strip that
+// leading "<count> reactions · <count> shares | " prefix, then clamp length
+// so a runaway title can never blow up a field.
+const cleanTitle = (raw: string): string => {
+  const withoutStats = raw
+    .replace(
+      /^[\d.,kmb]+\s+(reactions?|shares?|comments?|likes?|views?)(\s*·\s*[\d.,kmb]+\s+\w+)*\s*\|\s*/i,
+      ""
+    )
+    .trim();
+
+  if (withoutStats.length <= MAX_TITLE_LENGTH) return withoutStats;
+  return withoutStats.slice(0, MAX_TITLE_LENGTH).trimEnd() + "…";
+};
+
 const getMetaContent = (html: string, property: string): string | null => {
   const match =
     html.match(
@@ -62,7 +80,7 @@ export const fetchPreview = async (url: string): Promise<LinkPreview> => {
     const siteName = getMetaContent(html, "og:site_name");
 
     return {
-      title: title ? decodeHtmlEntities(title) : null,
+      title: title ? cleanTitle(decodeHtmlEntities(title)) : null,
       description: description ? decodeHtmlEntities(description) : null,
       thumbnail_url:
         decodeHtmlEntities(getMetaContent(html, "og:image") ?? "") || null,

@@ -27,6 +27,8 @@ import {
   useSetArchived,
 } from "@/features/links/hooks/useLinksHooks";
 import { useGroups } from "@/features/groups/hooks/useGroupsHooks";
+import { useTagsForLink } from "@/features/tags/hooks/useTagsHooks";
+import { TagList } from "@/components/TagList";
 import { getBrandInfo } from "@/lib/getBrandInfo";
 import { timeAgo } from "@/lib/timeAgo";
 import {
@@ -35,6 +37,7 @@ import {
   useSetReminder,
 } from "@/features/reminders/hooks/useRemindersHooks";
 import { PRESETS, formatReminderDate } from "@/features/reminders/utils";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
 export default function LinkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -46,6 +49,7 @@ export default function LinkDetailScreen() {
   const { mutate: markOpened } = useMarkOpened();
   const { mutate: setArchived } = useSetArchived();
   const { data: groups = [] } = useGroups();
+  const { data: tags = [] } = useTagsForLink(id ?? "");
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -132,6 +136,35 @@ export default function LinkDetailScreen() {
     );
   }
 
+  // Android's picker is imperative and one mode at a time: pick the date,
+  // then in its callback open the time picker, then combine the two.
+  const openCustomReminder = () => {
+    const now = new Date();
+    DateTimePickerAndroid.open({
+      value: now,
+      mode: "date",
+      minimumDate: now,
+      onChange: (dateEvent, date) => {
+        if (dateEvent.type !== "set" || !date) return;
+        DateTimePickerAndroid.open({
+          value: date,
+          mode: "time",
+          onChange: (timeEvent, time) => {
+            if (timeEvent.type !== "set" || !time) return;
+            const when = new Date(date);
+            when.setHours(time.getHours(), time.getMinutes(), 0, 0);
+            if (when <= new Date()) {
+              Alert.alert("Pick a future time", "That moment has already passed.");
+              return;
+            }
+            setReminder({ title: link.title ?? link.url, date: when });
+            setShowPicker(false);
+          },
+        });
+      },
+    });
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -194,8 +227,10 @@ export default function LinkDetailScreen() {
               <Text style={styles.metaLabel}>Group</Text>
             </View>
             <View style={styles.metaRight}>
-              <View
-                style={[styles.groupDot, { backgroundColor: group.color }]}
+              <Ionicons
+                name={group.icon as keyof typeof Ionicons.glyphMap}
+                size={16}
+                color={group.color}
               />
               <Text style={styles.metaValue}>{group.name}</Text>
             </View>
@@ -209,6 +244,15 @@ export default function LinkDetailScreen() {
           </View>
           <Text style={styles.metaValue}>{timeAgo(link.created_at)}</Text>
         </View>
+
+        {tags.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>TAGS</Text>
+            <View style={styles.tagsWrap}>
+              <TagList tags={tags} maxVisible={tags.length} />
+            </View>
+          </>
+        )}
 
         <Text style={styles.sectionLabel}>REMINDER</Text>
         {reminder ? (
@@ -275,6 +319,18 @@ export default function LinkDetailScreen() {
                 </Touchable>
               )}
             />
+            <Touchable
+              style={styles.customItem}
+              onPress={openCustomReminder}
+              disabled={isSetting}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={16}
+                color={Colors.gold}
+              />
+              <Text style={styles.presetText}>Pick date &amp; time…</Text>
+            </Touchable>
             <Touchable onPress={() => setShowPicker(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
             </Touchable>
@@ -417,7 +473,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.medium,
     fontWeight: "500",
   },
-  groupDot: { width: 8, height: 8, borderRadius: 4 },
+  tagsWrap: { paddingHorizontal: Spacing.padding.large },
   reminderCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -468,6 +524,14 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.input,
   },
   presetText: { color: Colors.primary, fontSize: Typography.fontSize.medium },
+  customItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.gap.small,
+    padding: Spacing.padding.medium,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.input,
+  },
   cancelText: {
     color: Colors.destructive,
     textAlign: "center",
