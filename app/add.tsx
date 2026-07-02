@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { finishActivity } from "@/lib/finishActivity";
+import { initialWindowMetrics } from "react-native-safe-area-context";
 
 const CLOSE_ICON_SIZE = 22;
 const NOTE_INPUT_HEIGHT = 80;
@@ -48,6 +49,11 @@ const SNAP_TALL = "90%";
 
 export default function AddScreen() {
   const router = useRouter();
+  // This route is a transparentModal; on Android react-native-screens hosts it
+  // in its own native container where useSafeAreaInsets() reads 0. Read the
+  // nav-bar height captured at app startup from the main window instead — it's
+  // the same physical bar and doesn't depend on the modal's measurement.
+  const bottomInset = initialWindowMetrics?.insets.bottom ?? 0;
   const sheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<BottomSheetScrollViewMethods>(null);
 
@@ -165,6 +171,7 @@ export default function AddScreen() {
       <BottomSheet
         ref={sheetRef}
         snapPoints={snapPoints} // idle: small; entered: taller; 90% = keyboard ceiling
+        bottomInset={bottomInset} // lift the whole sheet above the Android nav bar
         enableDynamicSizing={false} // respect the snap points
         keyboardBehavior="extend" // keyboard opens → jump to90% (above keyboard)
         keyboardBlurBehavior="restore" // keyboard closes → back to 50%
