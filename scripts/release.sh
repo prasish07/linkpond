@@ -16,6 +16,10 @@
 # First build after a clean prebuild takes ~10 min.
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
+# Force a UTF-8 locale: the publish echoes contain multi-byte chars (…), and in a
+# C/ASCII locale `set -u` glues an ellipsis byte onto "$TAG" and aborts with an
+# "unbound variable" error. Harmless interactively; bites in non-interactive shells.
+export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 cd "$(dirname "$0")/.."
 
 # --- locate toolchain ---
