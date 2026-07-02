@@ -3,7 +3,7 @@
     "scheme": "linkpond",
     "name": "linkpond",
     "slug": "linkpond",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -48,7 +48,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#2E2C28"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "router": {},
