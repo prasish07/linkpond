@@ -127,6 +127,23 @@ EAS build artifacts expire (~13 days) — reinstall when you next need the dev b
 > Bottom line: local builds **do** work — install JDK 17 and run Gradle with it. EAS remains
 > the zero-setup option when you don't want to build locally.
 
+## Cutting a release (one command)
+
+`scripts/release.sh` (alias `npm run release`) automates the whole thing: it regenerates
+`android/`, builds the APK on JDK 17, tags `vX.Y.Z`, and publishes a GitHub Release with the
+APK attached.
+
+```bash
+# 1. Bump expo.version in app.json via a normal PR, merge to main
+# 2. One-time: brew install openjdk@17
+# 3. On a clean, up-to-date main:
+npm run release
+```
+
+The version comes from `app.json` (`expo.version`) — the script refuses to run if that tag /
+release already exists, so bump the version first. See the header of `scripts/release.sh` for
+the full checklist.
+
 ---
 
 ## The dependency conflict that broke everything
